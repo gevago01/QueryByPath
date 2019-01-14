@@ -2,6 +2,7 @@ package partitioning.methods;
 
 import filtering.FilterEmptyAnswers;
 import filtering.FilterNullQueries;
+import filtering.ReduceNofTrajectories;
 import key.selectors.CSVTrajIDSelector;
 import key.selectors.TrajectoryTSSelector;
 import map.functions.CSVRecToTrajME;
@@ -21,6 +22,7 @@ import trie.Query;
 import trie.Trie;
 import utilities.CSVRecord;
 import utilities.Parallelism;
+import utilities.Stats;
 import utilities.Trajectory;
 
 import java.util.ArrayList;
@@ -35,8 +37,8 @@ public class TimeSlicing {
 
 
     //for full dataset
-    private static final Long MIN_TIME = 1372636853000l;
-    private static final Long MAX_TIME = 1404172759000l;
+//    private static final Long MIN_TIME = 1372636853000l;
+//    private static final Long MAX_TIME = 1404172759000l;
     //for half dataset
 //    private static final Long MIN_TIME = 1372636853000l;
 //    private static final Long MAX_TIME = 1404172751000l;
@@ -44,8 +46,8 @@ public class TimeSlicing {
 //    private static final Long MIN_TIME = 1372636951000l;
 //    private static final Long MAX_TIME = 1404172591000l;
     //for onesix
-//    private static final Long MIN_TIME = 1372636951000l;
-//    private static final Long MAX_TIME = 1404172591000l;
+    private static final Long MIN_TIME = 1372636951000l;
+    private static final Long MAX_TIME = 1404172591000l;
     //for sample
 //    private static final Long MIN_TIME = 1376904623000l;
 //    private static final Long MAX_TIME = 1376916881000l;
@@ -64,25 +66,26 @@ public class TimeSlicing {
 
     public static void main(String[] args) {
         int numberOfSlices = Integer.parseInt(args[0]);
+        String appName=HorizontalPartitioning.class.getSimpleName()+numberOfSlices;
 //        String fileName = "file:///mnt/hgfs/VM_SHARED/samplePort.csv";
 //        String fileName= "file:///mnt/hgfs/VM_SHARED/trajDatasets/octant.csv";
 //        String fileName= "file:///mnt/hgfs/VM_SHARED/trajDatasets/half.csv";
 //        String fileName= "file:///mnt/hgfs/VM_SHARED/trajDatasets/85TD.csv";
-//        String fileName= "file:///mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
+        String fileName= "file:///mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
 //          String fileName= "file:////home/giannis/concatTrajectoryDataset.csv";
 //        String fileName = "file:////data/half.csv";
 //        String fileName= "hdfs:////half.csv";
-        String fileName = "hdfs:////concatTrajectoryDataset.csv";
+//        String fileName = "hdfs:////concatTrajectoryDataset.csv";
 //        String fileName= "hdfs:////onesix.csv";
 //        String fileName= "hdfs:////octant.csv";
 
 //        String fileName= "file:////home/giannis/octant.csv";
         List<Long> timePeriods = getTimeIntervals(numberOfSlices);
-//        SparkConf conf = new SparkConf().setAppName(TimeSlicing.class.getSimpleName()).setMaster("local[*]").
-//                set("spark.executor.instances", "" + Parallelism.PARALLELISM);
-        SparkConf conf = new SparkConf().setAppName(TimeSlicing.class.getSimpleName())
-                .set("spark.executor.instances", "" + Parallelism.PARALLELISM)
-                .set("spark.executor.cores", "" + Parallelism.EXECUTOR_CORES);//.set("spark.executor.heartbeatInterval","15s");
+        SparkConf conf = new SparkConf().setAppName(appName).setMaster("local[*]").
+                set("spark.executor.instances", "" + Parallelism.PARALLELISM);
+//        SparkConf conf = new SparkConf().setAppName(appName)
+//                .set("spark.executor.instances", "" + Parallelism.PARALLELISM)
+//                .set("spark.executor.cores", "" + Parallelism.EXECUTOR_CORES);//.set("spark.executor.heartbeatInterval","15s");
 
         JavaSparkContext sc = new JavaSparkContext(conf);
         LongAccumulator nofQueries=sc.sc().longAccumulator("NofQueries");
@@ -91,7 +94,7 @@ public class TimeSlicing {
 
 
         JavaPairRDD<Long, Trajectory> trajectoryDataset = records.groupBy(new CSVTrajIDSelector()).mapValues(new CSVRecToTrajME()).flatMapValues(new TrajToTSTrajs(timePeriods));
-        JavaPairRDD<Integer, Trie> trieDataset = trajectoryDataset.values().groupBy(new TrajectoryTSSelector()).flatMapValues(new Function<Iterable<Trajectory>, Iterable<Trie>>() {
+        JavaPairRDD<Integer, Trie> trieDataset = trajectoryDataset.filter(new ReduceNofTrajectories()). values().groupBy(new TrajectoryTSSelector()).flatMapValues(new Function<Iterable<Trajectory>, Iterable<Trie>>() {
             @Override
             public Iterable<Trie> call(Iterable<Trajectory> trajectories) throws Exception {
                 List<Trie> trieList = new ArrayList<>();
@@ -143,10 +146,13 @@ public class TimeSlicing {
                     }
                 });
 
-        System.out.println("nofQueries:"+queries.count());
 
+        System.out.println("nofQueries:"+queries.count());
+        System.out.println("appName:"+appName);
         JavaPairRDD<Integer, Trie> partitionedTries = trieDataset.partitionBy(new IntegerPartitioner()).persist(StorageLevel.MEMORY_ONLY());
         JavaPairRDD<Integer, Query> partitionedQueries = queries.partitionBy(new IntegerPartitioner()).persist(StorageLevel.MEMORY_ONLY());
+
+        Stats.nofTriesInPartitions(partitionedTries);
 
         JavaPairRDD<Integer, Set<Long>> resultSet = partitionedTries.join(partitionedQueries).mapValues(new Function<Tuple2<Trie, Query>, Set<Long>>() {
             @Override

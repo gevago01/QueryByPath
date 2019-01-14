@@ -13,10 +13,6 @@ import java.util.Comparator;
  */
 public class CSVRecordToTrajectory implements Function<Iterable<CSVRecord>, Trajectory> {
 
-    private Integer horizontalPartitionSize;
-    private ArrayList<Long> timePeriods;
-
-
     @Override
     public Trajectory call(Iterable<CSVRecord> csvRecords) throws Exception {
 
@@ -27,11 +23,7 @@ public class CSVRecordToTrajectory implements Function<Iterable<CSVRecord>, Traj
 
         for (CSVRecord csvRec:csvRecordList) {
             if (mo == null) {
-                if (horizontalPartitionSize != null) {
-                    mo = new Trajectory(csvRec.getTrajID(), horizontalPartitionSize);
-                } else {
                     mo = new Trajectory(csvRec.getTrajID());
-                }
             }
             mo.addSample(csvRec.getTimestamp(), csvRec.getRoadSegment());
 

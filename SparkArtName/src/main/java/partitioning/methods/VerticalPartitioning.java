@@ -1,10 +1,10 @@
 package partitioning.methods;
 
 import filtering.FilterNullQueries;
+import filtering.ReduceNofTrajectories;
 import key.selectors.CSVTrajIDSelector;
 import map.functions.CSVRecToTrajME;
 import map.functions.LineToCSVRec;
-import org.apache.spark.Accumulator;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -12,7 +12,6 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFunction;
-import org.apache.spark.api.java.function.VoidFunction;
 import org.apache.spark.storage.StorageLevel;
 import org.apache.spark.util.LongAccumulator;
 import partitioners.LongPartitioner;
@@ -33,9 +32,9 @@ public class VerticalPartitioning {
     public static void main(String[] args) {
 //        String fileName = "file:///mnt/hgfs/VM_SHARED/samplePort.csv";
 //        String fileName= "file:///mnt/hgfs/VM_SHARED/trajDatasets/85TD.csv";
-//          String fileName= "file:////mnt/hgfs/VM_SHARED/trajDatasets/concatTrajectoryDataset.csv";
+        String fileName = "file:////mnt/hgfs/VM_SHARED/trajDatasets/concatTrajectoryDataset.csv";
 //          String fileName= "file:////mnt/hgfs/VM_SHARED/trajDatasets/half.csv";
-          String fileName= "file:////mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
+//          String fileName= "file:////mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
 //          String fileName= "file:////mnt/hgfs/VM_SHARED/trajDatasets/octant.csv";
 //        String fileName= "hdfs:////half.csv";
 //        String fileName= "hdfs:////85TD.csv";
@@ -50,11 +49,9 @@ public class VerticalPartitioning {
 //                .set("spark.executor.instances", "" + Parallelism.PARALLELISM)
 //                .set("spark.executor.cores", "" + Parallelism.EXECUTOR_CORES);//.set("spark.executor.heartbeatInterval","15s");
         JavaSparkContext sc = new JavaSparkContext(conf);
-        LongAccumulator nofQueries=sc.sc().longAccumulator("NofQueries");
-        LongAccumulator queryLengthSum=sc.sc().longAccumulator("queryLengthSum");
+        LongAccumulator nofQueries = sc.sc().longAccumulator("NofQueries");
+        LongAccumulator queryLengthSum = sc.sc().longAccumulator("queryLengthSum");
         JavaRDD<CSVRecord> records = sc.textFile(fileName).map(new LineToCSVRec());
-
-
 
 
         JavaPairRDD<Long, Trajectory> trajectoryDataset = records.groupBy(new CSVTrajIDSelector()).mapValues(new CSVRecToTrajME()).mapToPair(new PairFunction<Tuple2<Long, Trajectory>, Long, Trajectory>() {
@@ -62,8 +59,12 @@ public class VerticalPartitioning {
             public Tuple2<Long, Trajectory> call(Tuple2<Long, Trajectory> trajectoryTuple2) throws Exception {
                 return new Tuple2<>(trajectoryTuple2._2().getStartingRS(), trajectoryTuple2._2());
             }
-        });
+        }).filter(new ReduceNofTrajectories());
+        long x=trajectoryDataset.count();
 
+        System.out.println("nof trajs<100:"+x);
+
+        System.exit(1);
 //        trajectoryDataset.aggregateByKey()
 //        JavaPairRDD<Long, Trie> trieRDD = trajectoryDataset.combineByKey(new TrajectoryCombiner(), new MergeTrajectory(),new MergeTries(), new LongPartitioner()).mapToPair(new PairFunction<Tuple2<Long,Trie>, Long, Trie>() {
 //            @Override
@@ -112,7 +113,7 @@ public class VerticalPartitioning {
                     @Override
                     public Query call(Trajectory trajectory) throws Exception {
                         if (getRandomBoolean(PROBABILITY)) {
-                            Query q = new Query(trajectory.getStartingTime(),trajectory.getEndingTime(),trajectory.roadSegments);
+                            Query q = new Query(trajectory.getStartingTime(), trajectory.getEndingTime(), trajectory.roadSegments);
                             nofQueries.add(1L);
                             queryLengthSum.add(trajectory.roadSegments.size());
                             return q;
@@ -128,7 +129,7 @@ public class VerticalPartitioning {
                     }
                 });
 
-        System.out.println("nofQueries:"+queries.count());
+        System.out.println("nofQueries:" + queries.count());
 
         JavaPairRDD<Long, Query> partitionedQueries = queries.partitionBy(new LongPartitioner()).persist(StorageLevel.MEMORY_ONLY());
         JavaPairRDD<Long, Trie> partitionedTries = trieRDD.partitionBy(new LongPartitioner()).persist(StorageLevel.MEMORY_ONLY());
@@ -137,7 +138,7 @@ public class VerticalPartitioning {
         JavaPairRDD<Long, Set<Long>> resultSet = partitionedTries.join(partitionedQueries).mapValues(new Function<Tuple2<Trie, Query>, Set<Long>>() {
             @Override
             public Set<Long> call(Tuple2<Trie, Query> trieQueryTuple2) throws Exception {
-                    return trieQueryTuple2._1().queryIndex(trieQueryTuple2._2());
+                return trieQueryTuple2._1().queryIndex(trieQueryTuple2._2());
             }
         }).filter(new Function<Tuple2<Long, Set<Long>>, Boolean>() {
             @Override
@@ -145,8 +146,6 @@ public class VerticalPartitioning {
                 return v1._2().isEmpty() ? false : true;
             }
         });
-
-
 
 
         List<Tuple2<Long, Set<Long>>> lisof = resultSet.collect();

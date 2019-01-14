@@ -20,6 +20,7 @@ public class HCSVRecToTrajME implements Function<Iterable<CSVRecord>, Iterable<T
         HORIZONTAL_PARTITION_SIZE = partitionSize;
     }
 
+    public static int max=Integer.MIN_VALUE;
 
     @Override
     public Iterable<Trajectory> call(Iterable<CSVRecord> csvRecords) throws Exception {
@@ -27,6 +28,9 @@ public class HCSVRecToTrajME implements Function<Iterable<CSVRecord>, Iterable<T
         List<Trajectory> trajectoryList = new ArrayList<>();
         ArrayList<CSVRecord> csvRecordList = Lists.newArrayList(csvRecords);
 
+        if (csvRecordList.size()>max){
+            max=csvRecordList.size();
+        }
         csvRecordList.sort(Comparator.comparing(CSVRecord::getTimestamp));
         List<List<CSVRecord>> allSubTrajs = Lists.partition(csvRecordList, HORIZONTAL_PARTITION_SIZE);
 

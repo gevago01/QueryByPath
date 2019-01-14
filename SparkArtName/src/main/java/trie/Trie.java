@@ -146,6 +146,7 @@ public class Trie implements Serializable {
 
             long roadSegment = q.getPathSegments().get(i);
 
+
             if (currentNode.getWord()==(roadSegment)) {
                 continue;
             }
@@ -153,11 +154,10 @@ public class Trie implements Serializable {
 
             if (child == null) {
                 //no matching result
-//                return false;
                 System.err.println("no matching result");
                 break;
             }
-            if (child.getWord()==(roadSegment)) {
+            else{
                 //here filter time
                 answer.addAll(child.getTrajectories(q.getStartingTime(), (q.getEndingTime() + 1)));
                 currentNode = child;
@@ -186,5 +186,9 @@ public class Trie implements Serializable {
 
     public void addTrajectory(Trajectory trajectory) {
         insertTrajectory2(trajectory.roadSegments, trajectory. trajectoryID, trajectory. getStartingTime(), trajectory. getEndingTime());
+    }
+
+    public void insertTrajectory2(Trajectory traj) {
+        insertTrajectory2(traj.roadSegments, traj.trajectoryID, traj.getStartingTime(), traj.getEndingTime());
     }
 }

@@ -30,6 +30,11 @@ public class Trajectory  implements Serializable{
     }
     private long startingTime;
     private long endingTime;
+
+    public LongArrayList getRoadSegments() {
+        return roadSegments;
+    }
+
     public LongArrayList roadSegments = new LongArrayList();
     public Integer timeSlice = 0;
 

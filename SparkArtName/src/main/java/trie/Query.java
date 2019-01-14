@@ -7,17 +7,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Query implements Serializable {
+
+    private long queryID;
     private long startingTime, endingTime;
     public int timeSlice;
     private int horizontalPartition = -1;
-    public LongArrayList pathSegments = new LongArrayList();
+    public List<Long> pathSegments = new LongArrayList();
 
-    public Query(long startingTime, long endingTime, LongArrayList roadSegments) {
+    public Query(long startingTime, long endingTime, List<Long> roadSegments) {
         this.startingTime=startingTime;
         this.endingTime=endingTime;
         this.pathSegments=roadSegments;
     }
 
+    public long getQueryID() {
+        return queryID;
+    }
+    public void setQueryID(long queryID) {
+        this.queryID = queryID;
+    }
 
     public int getTimeSlice() {
         return timeSlice;
@@ -47,7 +55,7 @@ public class Query implements Serializable {
     }
 
     public Long getStartingRoadSegment() {
-        return pathSegments.getLong(0);
+        return pathSegments.get(0);
     }
 
     public void setStartingTime(long startingTime) {
