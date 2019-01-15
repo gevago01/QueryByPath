@@ -1,1 +1,3 @@
+partitioning/methods/HorizontalPartitioning$10.class
+filtering/ReduceNofTrajectories.class
 map/functions/LineToCSVRec.class

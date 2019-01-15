@@ -40,23 +40,23 @@ public class HorizontalPartitioning {
         int horizontalPartitionSize = Integer.parseInt(args[0]);
 
         String appName = HorizontalPartitioning.class.getSimpleName() + horizontalPartitionSize;
-        String fileName = "file:////mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
+//        String fileName = "file:////mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
 //        String fileName = "file:////mnt/hgfs/VM_SHARED/trajDatasets/half.csv";
 //        String fileName = "file:////mnt/hgfs/VM_SHARED/trajDatasets/octant.csv";
 //        String fileName = "file:///mnt/hgfs/VM_SHARED/samplePort.csv";
-//        String fileName= "hdfs:////concatTrajectoryDataset.csv";
+        String fileName= "hdfs:////concatTrajectoryDataset.csv";
 //        String fileName = "hdfs:////85TD.csv";
 //        String fileName = "hdfs:////half.csv";
 //        String fileName = "hdfs:////onesix.csv";
 //        String fileName = "hdfs:////octant.csv";
 //        String fileName = "hdfs:////65PC.csv";
-        SparkConf conf = new SparkConf().setAppName(appName)
-                .setMaster("local[*]")
-                .set("spark.executor.instances", "" + Parallelism.PARALLELISM)
-                .set("spark.executor.cores", "" + Parallelism.EXECUTOR_CORES);
 //        SparkConf conf = new SparkConf().setAppName(appName)
+//                .setMaster("local[*]")
 //                .set("spark.executor.instances", "" + Parallelism.PARALLELISM)
-//                .set("spark.executor.cores","" + Parallelism.EXECUTOR_CORES );//.set("spark.executor.heartbeatInterval","15s");
+//                .set("spark.executor.cores", "" + Parallelism.EXECUTOR_CORES);
+        SparkConf conf = new SparkConf().setAppName(appName)
+                .set("spark.executor.instances", "" + Parallelism.PARALLELISM)
+                .set("spark.executor.cores","" + Parallelism.EXECUTOR_CORES );//.set("spark.executor.heartbeatInterval","15s");
 
 
         JavaSparkContext sc = new JavaSparkContext(conf);
@@ -167,17 +167,12 @@ public class HorizontalPartitioning {
 
 
         System.out.println("nofQueries:" + queries.count());
-        System.out.println("appName:" + appName);
         JavaPairRDD<Integer, Trie> partitionedTries = trieRDD.partitionBy(new IntegerPartitioner()).persist(StorageLevel.MEMORY_ONLY());
         JavaPairRDD<Integer, Query> partitionedQueries = queries.partitionBy(new IntegerPartitioner()).persist(StorageLevel.MEMORY_ONLY());
 
 
         Stats.nofTriesInPartitions(partitionedTries);
 
-
-        System.out.println("MaxTrajLength:"+HCSVRecToTrajME.max);
-
-        System.exit(1);
 
         JavaPairRDD<Long, Long> resultSet =
                 partitionedTries.join(partitionedQueries).mapValues(new Function<Tuple2<Trie, Query>, Tuple2<Long, Set<Long>>>() {
@@ -207,8 +202,9 @@ public class HorizontalPartitioning {
         }
 
         System.out.println("resultCollection.size():" + resultCollection.size());
-
+        System.out.println("MaxTrajLength:"+HCSVRecToTrajME.max);
     }
+
 
 
 }

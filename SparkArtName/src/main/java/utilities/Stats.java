@@ -76,7 +76,7 @@ public class Stats {
         return lengthList.stream().mapToDouble(v -> v).average().getAsDouble();
     }
 
-    public static void nofTriesInPartitions(JavaPairRDD<Integer, Trie> partitionedTries) {
+    public static void nofTriesInPartitions(final JavaPairRDD<Integer, Trie> partitionedTries) {
         List<Tuple2<Integer, Integer>> list=
                 partitionedTries.mapPartitions(new FlatMapFunction<Iterator<Tuple2<Integer, Trie>>, Tuple2<Integer, Integer>>() {
                     @Override
@@ -90,7 +90,7 @@ public class Stats {
                         }
                         return list.iterator();
                     }
-                }, true).groupBy(new Function<Tuple2<Integer, Integer>, Integer>() {
+                }, false).groupBy(new Function<Tuple2<Integer, Integer>, Integer>() {
                     @Override
                     public Integer call(Tuple2<Integer, Integer> v1) throws Exception {
                         return v1._1();

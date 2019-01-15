@@ -1,5 +1,6 @@
 package partitioning.methods;
 
+import comparators.LongComparator;
 import filtering.FilterEmptyAnswers;
 import filtering.FilterNullQueries;
 import filtering.ReduceNofTrajectories;
@@ -14,9 +15,11 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFunction;
+import org.apache.spark.api.java.function.VoidFunction;
 import org.apache.spark.storage.StorageLevel;
 import org.apache.spark.util.LongAccumulator;
 import partitioners.IntegerPartitioner;
+import projections.ProjectTimestamps;
 import scala.Tuple2;
 import trie.Query;
 import trie.Trie;
@@ -25,10 +28,7 @@ import utilities.Parallelism;
 import utilities.Stats;
 import utilities.Trajectory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by giannis on 10/12/18.
@@ -52,7 +52,10 @@ public class TimeSlicing {
 //    private static final Long MIN_TIME = 1376904623000l;
 //    private static final Long MAX_TIME = 1376916881000l;
 
-    public static List<Long> getTimeIntervals(long NUMBER_OF_SLICES) {
+    //    private static final Long MIN_TIME = 1372636951000l;
+//    private static final Long MAX_TIME = 1404172591000l;
+
+    public static List<Long> getTimeIntervals(long NUMBER_OF_SLICES, long MIN_TIME,long MAX_TIME) {
         final Long timeInt = (MAX_TIME - MIN_TIME) / NUMBER_OF_SLICES;
 
         List<Long> timePeriods = new ArrayList<>();
@@ -61,6 +64,7 @@ public class TimeSlicing {
         }
         timePeriods.add(MAX_TIME);
 
+        System.out.println("Using:::"+MIN_TIME+","+MAX_TIME);
         return timePeriods;
     }
 
@@ -80,7 +84,7 @@ public class TimeSlicing {
 //        String fileName= "hdfs:////octant.csv";
 
 //        String fileName= "file:////home/giannis/octant.csv";
-        List<Long> timePeriods = getTimeIntervals(numberOfSlices);
+
         SparkConf conf = new SparkConf().setAppName(appName).setMaster("local[*]").
                 set("spark.executor.instances", "" + Parallelism.PARALLELISM);
 //        SparkConf conf = new SparkConf().setAppName(appName)
@@ -92,9 +96,18 @@ public class TimeSlicing {
 
         JavaRDD<CSVRecord> records = sc.textFile(fileName).map(new LineToCSVRec());
 
+        JavaRDD<Long> timestamps = records.map(new ProjectTimestamps());
 
-        JavaPairRDD<Long, Trajectory> trajectoryDataset = records.groupBy(new CSVTrajIDSelector()).mapValues(new CSVRecToTrajME()).flatMapValues(new TrajToTSTrajs(timePeriods));
-        JavaPairRDD<Integer, Trie> trieDataset = trajectoryDataset.filter(new ReduceNofTrajectories()). values().groupBy(new TrajectoryTSSelector()).flatMapValues(new Function<Iterable<Trajectory>, Iterable<Trie>>() {
+        timestamps.count();
+        long min=timestamps.min(new LongComparator());
+        long max=timestamps.max(new LongComparator());
+
+//        System.out.println("min:"+min);
+//        System.out.println("max:"+max);
+        List<Long> timePeriods = getTimeIntervals(numberOfSlices,min,max);
+
+        JavaPairRDD<Long, Trajectory> trajectoryDataset = records.groupBy(new CSVTrajIDSelector()).mapValues(new CSVRecToTrajME()).filter(new ReduceNofTrajectories()).flatMapValues(new TrajToTSTrajs(timePeriods));
+        JavaPairRDD<Integer, Trie> trieDataset = trajectoryDataset. values().groupBy(new TrajectoryTSSelector()).flatMapValues(new Function<Iterable<Trajectory>, Iterable<Trie>>() {
             @Override
             public Iterable<Trie> call(Iterable<Trajectory> trajectories) throws Exception {
                 List<Trie> trieList = new ArrayList<>();
@@ -117,8 +130,8 @@ public class TimeSlicing {
 
                     private Random random = new Random();
 
-                    private final static float PROBABILITY = 0.0002f;
-                    //private final static float PROBABILITY = 1f;
+//                    private final static float PROBABILITY = 0.0002f;
+                    private final static float PROBABILITY = 1f;
 
                     private boolean getRandomBoolean(float p) {
 
@@ -166,6 +179,8 @@ public class TimeSlicing {
             System.out.println(t);
 
         }
+
+        System.out.println("resultSetSize:"+lisof.size());
 
     }
 }

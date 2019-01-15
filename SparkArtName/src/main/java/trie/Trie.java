@@ -155,6 +155,7 @@ public class Trie implements Serializable {
             if (child == null) {
                 //no matching result
                 System.err.println("no matching result");
+                System.exit(1);
                 break;
             }
             else{
