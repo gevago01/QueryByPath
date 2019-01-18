@@ -19,6 +19,7 @@ import partitioners.LongPartitioner;
 import partitioners.StartingRSPartitioner;
 import projections.ProjectRoadSegments;
 import scala.Tuple2;
+import trie.Node;
 import trie.Query;
 import trie.Trie;
 import utilities.CSVRecord;
@@ -89,9 +90,8 @@ public class VerticalPartitioning {
         SparkConf conf = new SparkConf().setAppName(VerticalPartitioning.class.getSimpleName())
                 .setMaster("local[*]")
                 .set("spark.executor.instances", "" + Parallelism.PARALLELISM);
-//        SparkConf conf = new SparkConf().setAppName(VerticalPartitioning.class.getSimpleName())
-//                .set("spark.executor.instances", "" + Parallelism.PARALLELISM)
-//                .set("spark.executor.cores", "" + Parallelism.EXECUTOR_CORES);//.set("spark.executor.heartbeatInterval","15s");
+//        SparkConf conf = new SparkConf().setAppName(VerticalPartitioning.class.getSimpleName());
+
         JavaSparkContext sc = new JavaSparkContext(conf);
         LongAccumulator nofQueries = sc.sc().longAccumulator("NofQueries");
         LongAccumulator queryLengthSum = sc.sc().longAccumulator("queryLengthSum");
@@ -132,7 +132,7 @@ public class VerticalPartitioning {
                         Iterable<Trajectory> trajectories = stringIterableTuple2._2();
                         Trie trie = new Trie();
                         for (Trajectory traj : trajectories) {
-                            trie.insertTrajectory2(traj.roadSegments, traj.trajectoryID, traj.getStartingTime(), traj.getEndingTime());
+                            trie.insertTrajectory2(traj);
                         }
                         trieList.add(trie);
                         return trieList.iterator();

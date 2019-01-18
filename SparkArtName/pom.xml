@@ -60,8 +60,8 @@
                             </filters>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <!--<mainClass>partitioning.methods.TimeSlicing</mainClass>-->
-                                    <mainClass>partitioning.methods.VerticalPartitioning</mainClass>
+                                    <mainClass>partitioning.methods.TimeSlicing</mainClass>
+                                    <!--<mainClass>partitioning.methods.VerticalPartitioning</mainClass>-->
                                     <!--<mainClass>partitioning.methods.HorizontalPartitioning</mainClass>-->
                                 </transformer>
                                 <!-- append default configs -->

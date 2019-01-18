@@ -35,6 +35,10 @@ public class HCSVRecToTrajME implements Function<Iterable<CSVRecord>, Iterable<T
         List<List<CSVRecord>> allSubTrajs = Lists.partition(csvRecordList, HORIZONTAL_PARTITION_SIZE);
 
 
+        if (allSubTrajs.size()>10) {
+            System.out.println("allSubTrajs.size():" + allSubTrajs.size());
+
+        }
         int subTrajID = 0;
         for (List<CSVRecord> subTrajectory : allSubTrajs) {
             Trajectory mo = null;

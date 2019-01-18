@@ -28,6 +28,7 @@ import utilities.Parallelism;
 import utilities.Stats;
 import utilities.Trajectory;
 
+import java.sql.Time;
 import java.util.*;
 
 /**
@@ -64,32 +65,29 @@ public class TimeSlicing {
         }
         timePeriods.add(MAX_TIME);
 
-        System.out.println("Using:::"+MIN_TIME+","+MAX_TIME);
         return timePeriods;
     }
 
     public static void main(String[] args) {
         int numberOfSlices = Integer.parseInt(args[0]);
-        String appName=HorizontalPartitioning.class.getSimpleName()+numberOfSlices;
+        String appName=TimeSlicing.class.getSimpleName()+numberOfSlices;
 //        String fileName = "file:///mnt/hgfs/VM_SHARED/samplePort.csv";
 //        String fileName= "file:///mnt/hgfs/VM_SHARED/trajDatasets/octant.csv";
 //        String fileName= "file:///mnt/hgfs/VM_SHARED/trajDatasets/half.csv";
 //        String fileName= "file:///mnt/hgfs/VM_SHARED/trajDatasets/85TD.csv";
-        String fileName= "file:///mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
+//        String fileName= "file:///mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
 //          String fileName= "file:////home/giannis/concatTrajectoryDataset.csv";
 //        String fileName = "file:////data/half.csv";
 //        String fileName= "hdfs:////half.csv";
-//        String fileName = "hdfs:////concatTrajectoryDataset.csv";
+        String fileName = "hdfs:////concatTrajectoryDataset.csv";
 //        String fileName= "hdfs:////onesix.csv";
 //        String fileName= "hdfs:////octant.csv";
 
 //        String fileName= "file:////home/giannis/octant.csv";
 
-        SparkConf conf = new SparkConf().setAppName(appName).setMaster("local[*]").
-                set("spark.executor.instances", "" + Parallelism.PARALLELISM);
-//        SparkConf conf = new SparkConf().setAppName(appName)
-//                .set("spark.executor.instances", "" + Parallelism.PARALLELISM)
-//                .set("spark.executor.cores", "" + Parallelism.EXECUTOR_CORES);//.set("spark.executor.heartbeatInterval","15s");
+//        SparkConf conf = new SparkConf().setAppName(appName).setMaster("local[*]").
+//                set("spark.executor.instances", "" + Parallelism.PARALLELISM);
+        SparkConf conf = new SparkConf().setAppName(appName);
 
         JavaSparkContext sc = new JavaSparkContext(conf);
         LongAccumulator nofQueries=sc.sc().longAccumulator("NofQueries");
@@ -102,9 +100,8 @@ public class TimeSlicing {
         long min=timestamps.min(new LongComparator());
         long max=timestamps.max(new LongComparator());
 
-//        System.out.println("min:"+min);
-//        System.out.println("max:"+max);
         List<Long> timePeriods = getTimeIntervals(numberOfSlices,min,max);
+
 
         JavaPairRDD<Long, Trajectory> trajectoryDataset = records.groupBy(new CSVTrajIDSelector()).mapValues(new CSVRecToTrajME()).filter(new ReduceNofTrajectories()).flatMapValues(new TrajToTSTrajs(timePeriods));
         JavaPairRDD<Integer, Trie> trieDataset = trajectoryDataset. values().groupBy(new TrajectoryTSSelector()).flatMapValues(new Function<Iterable<Trajectory>, Iterable<Trie>>() {
@@ -114,7 +111,7 @@ public class TimeSlicing {
                 Trie trie = new Trie();
                 for (Trajectory t : trajectories) {
 
-                    trie.insertTrajectory2(t.roadSegments, t.trajectoryID, t.getStartingTime(), t.getEndingTime());
+                    trie.insertTrajectory2(t);
 
                     trie.timeSlice = t.timeSlice;
                 }
@@ -130,8 +127,8 @@ public class TimeSlicing {
 
                     private Random random = new Random();
 
-//                    private final static float PROBABILITY = 0.0002f;
-                    private final static float PROBABILITY = 1f;
+                    private final static float PROBABILITY = 0.0002f;
+//                    private final static float PROBABILITY = 1f;
 
                     private boolean getRandomBoolean(float p) {
 
@@ -165,7 +162,7 @@ public class TimeSlicing {
         JavaPairRDD<Integer, Trie> partitionedTries = trieDataset.partitionBy(new IntegerPartitioner()).persist(StorageLevel.MEMORY_ONLY());
         JavaPairRDD<Integer, Query> partitionedQueries = queries.partitionBy(new IntegerPartitioner()).persist(StorageLevel.MEMORY_ONLY());
 
-        Stats.nofTriesInPartitions(partitionedTries);
+        Stats.nofQueriesInEachTimeSlice(partitionedQueries);
 
         JavaPairRDD<Integer, Set<Long>> resultSet = partitionedTries.join(partitionedQueries).mapValues(new Function<Tuple2<Trie, Query>, Set<Long>>() {
             @Override

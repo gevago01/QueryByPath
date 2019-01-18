@@ -31,7 +31,7 @@
               </filters>
               <transformers>
                 <transformer>
-                  <mainClass>partitioning.methods.VerticalPartitioning</mainClass>
+                  <mainClass>partitioning.methods.TimeSlicing</mainClass>
                 </transformer>
                 <transformer>
                   <resource>reference.conf</resource>

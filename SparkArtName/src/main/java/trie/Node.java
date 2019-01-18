@@ -21,6 +21,7 @@ public class Node implements Serializable {
     public void setLevel(int level) {
         this.level = level;
     }
+    private int asd;
 
 
 //    public Collection<Node> getNodes() {

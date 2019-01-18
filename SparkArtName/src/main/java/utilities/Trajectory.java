@@ -65,7 +65,6 @@ public class Trajectory  implements Serializable{
     }
 
 
-    //TODO MAYBE THIS shallow copy is to blame
     public Trajectory(Trajectory t, int time_slice) {
         trajectoryID = t.trajectoryID;
         roadSegments = t.roadSegments;

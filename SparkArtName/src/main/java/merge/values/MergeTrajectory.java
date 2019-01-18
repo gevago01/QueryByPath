@@ -12,7 +12,7 @@ public class MergeTrajectory implements Function2< Trie,Trajectory,Trie> {
     @Override
     public Trie call(Trie trie, Trajectory trajectory) throws Exception {
         System.out.println("Adding traj with SRS:"+trajectory.getStartingRS()+" to trie with SRS:"+trie.getStartingRS());
-        trie.addTrajectory(trajectory);
+        trie.insertTrajectory2(trajectory);
         return trie;
     }
 }

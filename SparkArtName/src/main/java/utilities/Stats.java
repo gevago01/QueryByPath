@@ -3,6 +3,8 @@ package utilities;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.Function2;
+import org.apache.spark.api.java.function.PairFunction;
 import scala.Tuple2;
 import trie.Query;
 import trie.Trie;
@@ -90,26 +92,36 @@ public class Stats {
                         }
                         return list.iterator();
                     }
-                }, false).groupBy(new Function<Tuple2<Integer, Integer>, Integer>() {
+                }, true).mapToPair(new PairFunction<Tuple2<Integer, Integer>, Integer, Integer>() {
                     @Override
-                    public Integer call(Tuple2<Integer, Integer> v1) throws Exception {
-                        return v1._1();
+                    public Tuple2<Integer, Integer> call(Tuple2<Integer, Integer> integerIntegerTuple2) throws Exception {
+                        return integerIntegerTuple2;
                     }
-                }).flatMapValues(new Function<Iterable<Tuple2<Integer, Integer>>, Iterable<Tuple2<Integer, Integer>>>() {
+                })
+                        .reduceByKey(new Function2<Integer, Integer, Integer>() {
                     @Override
-                    public Iterable<Tuple2<Integer, Integer>> call(Iterable<Tuple2<Integer, Integer>> v1) throws Exception {
+                    public Integer call(Integer v1, Integer v2) throws Exception {
+                        return v1+v2;
+                    }
+                }).collect();
 
-                        List<Tuple2<Integer, Integer>> list = new ArrayList<>();
-                        Tuple2<Integer, Integer> lastTuple = null;
-                        int sum = 0;
-                        for (Tuple2<Integer, Integer> t : v1) {
-                            sum += t._2();
-                            lastTuple = t;
-                        }
-                        list.add(new Tuple2<>(lastTuple._1(), sum));
-                        return list;
-                    }
-                }).values().collect();
         System.out.println("nofTriesInPartitions::"+list);
+    }
+
+    public static void nofQueriesInEachTimeSlice(JavaPairRDD<Integer, Query> queries) {
+
+        List<Tuple2<Integer, Integer>> list=queries.mapToPair(new PairFunction<Tuple2<Integer, Query>, Integer, Integer>() {
+            @Override
+            public Tuple2<Integer, Integer> call(Tuple2<Integer, Query> integerQueryTuple2) throws Exception {
+                return new Tuple2<>(integerQueryTuple2._2().getTimeSlice()%Parallelism.PARALLELISM,1);
+            }
+        }).reduceByKey(new Function2<Integer, Integer, Integer>() {
+            @Override
+            public Integer call(Integer v1, Integer v2) throws Exception {
+                return v1+v2;
+            }
+        }).collect();
+
+        System.out.println("nofQueriesInEachTimeSlice::"+list);
     }
 }

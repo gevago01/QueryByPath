@@ -13,7 +13,7 @@ public class TrajectoryCombiner implements Function<Trajectory, Trie> {
 
         Trie trie=new Trie();
         trie.setStartingRoadSegment(trajectory.getStartingRS());
-        trie.addTrajectory(trajectory);
+        trie.insertTrajectory2(trajectory);
         return trie;
     }
 }
