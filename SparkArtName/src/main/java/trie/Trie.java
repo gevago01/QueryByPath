@@ -11,6 +11,7 @@ public class Trie implements Serializable {
     private long startingRoadSegment = Long.MAX_VALUE;
     public int timeSlice;
     private int horizontalTrieID;
+    private int verticalID;
 
     public int getTrajectoryCounter() {
         return trajectoryCounter;
@@ -160,8 +161,8 @@ public class Trie implements Serializable {
 
             if (child == null) {
                 //no matching result
-                System.err.println("no matching result");
-                System.exit(1);
+//                System.err.println("no matching result");
+//                System.exit(1);
                 break;
             }
             else{
@@ -196,5 +197,13 @@ public class Trie implements Serializable {
     public void insertTrajectory2(Trajectory traj) {
         ++trajectoryCounter;
         insertTrajectory2(traj.roadSegments, traj.trajectoryID, traj.getStartingTime(), traj.getEndingTime());
+    }
+
+    public void setVerticalID(int verticalID) {
+        this.verticalID = verticalID;
+    }
+
+    public int getVerticalID() {
+        return verticalID;
     }
 }

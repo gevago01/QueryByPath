@@ -11,17 +11,21 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.api.java.function.*;
+import org.apache.spark.api.java.function.FlatMapFunction;
+import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.storage.StorageLevel;
+import org.apache.spark.util.DoubleAccumulator;
 import org.apache.spark.util.LongAccumulator;
 import partitioners.IntegerPartitioner;
 import scala.Tuple2;
 import trie.Query;
 import trie.Trie;
 import utilities.CSVRecord;
-import utilities.Stats;
+import utilities.Parallelism;
 import utilities.Trajectory;
 
+import java.io.*;
 import java.util.*;
 import java.util.stream.StreamSupport;
 
@@ -36,43 +40,45 @@ public class HorizontalPartitioning {
 
         String appName = HorizontalPartitioning.class.getSimpleName() + horizontalPartitionSize;
 //        String fileName = "file:////mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
-//        String fileName = "file:////mnt/hgfs/VM_SHARED/trajDatasets/half.csv";
+        String fileName = "file:////mnt/hgfs/VM_SHARED/trajDatasets/half.csv";
 //        String fileName = "file:////mnt/hgfs/VM_SHARED/trajDatasets/octant.csv";
 //        String fileName = "file:///mnt/hgfs/VM_SHARED/samplePort.csv";
-        String fileName= "hdfs:////concatTrajectoryDataset.csv";
+//        String fileName= "hdfs:////concatTrajectoryDataset.csv";
 //        String fileName = "hdfs:////85TD.csv";
 //        String fileName = "hdfs:////half.csv";
 //        String fileName = "hdfs:////onesix.csv";
 //        String fileName = "hdfs:////octant.csv";
 //        String fileName = "hdfs:////65PC.csv";
-//        SparkConf conf = new SparkConf().setAppName(appName)
-//                .setMaster("local[*]")
-//                .set("spark.executor.instances", "" + Parallelism.PARALLELISM)
-//                .set("spark.executor.cores", "" + Parallelism.EXECUTOR_CORES);
-        SparkConf conf = new SparkConf().setAppName(appName);
+        SparkConf conf = new SparkConf().setAppName(appName)
+                .setMaster("local[*]")
+                .set("spark.executor.instances", "" + Parallelism.PARALLELISM);
+//        SparkConf conf = new SparkConf().setAppName(appName);
 
 
         JavaSparkContext sc = new JavaSparkContext(conf);
         LongAccumulator nofQueries = sc.sc().longAccumulator("NofQueries");
+        DoubleAccumulator joinTimeAcc = sc.sc().doubleAccumulator("joinTimeAcc");
         JavaRDD<CSVRecord> records = sc.textFile(fileName).map(new LineToCSVRec());
 
         JavaPairRDD<Long, Iterable<CSVRecord>> recordsCached = records.groupBy(new CSVTrajIDSelector()).cache();
+
+        JavaPairRDD<Long, Iterable<CSVRecord>> recordSample = recordsCached.sample(false, 0.00055);
+
         JavaPairRDD<Integer, Trajectory> trajectoryDataset = recordsCached
                 .filter(new Function<Tuple2<Long, Iterable<CSVRecord>>, Boolean>() {
-            @Override
-            public Boolean call(Tuple2<Long, Iterable<CSVRecord>> v1) throws Exception {
-                return v1._2().spliterator().getExactSizeIfKnown() > ReduceNofTrajectories.MAX_TRAJECTORY_SIZE? false:true;
-            }
-        })
-                .flatMapValues(new HCSVRecToTrajME(horizontalPartitionSize)).
-                mapToPair(new PairFunction<Tuple2<Long, Trajectory>, Integer, Trajectory>() {
                     @Override
-                    public Tuple2<Integer, Trajectory> call(Tuple2<Long, Trajectory> trajectoryTuple2) throws Exception {
-                        Integer horizontalID = trajectoryTuple2._2().getHorizontalID();
-                        return new Tuple2<>(horizontalID, trajectoryTuple2._2());
+                    public Boolean call(Tuple2<Long, Iterable<CSVRecord>> v1) throws Exception {
+                        return v1._2().spliterator().getExactSizeIfKnown() > ReduceNofTrajectories.MAX_TRAJECTORY_SIZE ? false : true;
                     }
-                });
-
+                })
+                .flatMapValues(new HCSVRecToTrajME(horizontalPartitionSize)).
+                        mapToPair(new PairFunction<Tuple2<Long, Trajectory>, Integer, Trajectory>() {
+                            @Override
+                            public Tuple2<Integer, Trajectory> call(Tuple2<Long, Trajectory> trajectoryTuple2) throws Exception {
+                                Integer horizontalID = trajectoryTuple2._2().getHorizontalID();
+                                return new Tuple2<>(horizontalID, trajectoryTuple2._2());
+                            }
+                        });
 
 
         JavaPairRDD<Integer, Trie> trieRDD = trajectoryDataset.groupByKey().flatMap(new FlatMapFunction<Tuple2<Integer, Iterable<Trajectory>>, Trie>() {
@@ -99,8 +105,6 @@ public class HorizontalPartitioning {
         });
 
 
-
-
 //        @Override
 //        public Query call(Trajectory trajectory) throws Exception {
 //            Query q = new Query(trajectory.getStartingTime(),trajectory.getEndingTime(),trajectory.roadSegments);
@@ -112,10 +116,10 @@ public class HorizontalPartitioning {
         JavaPairRDD<Integer, Query> queries = recordsCached.filter(new Function<Tuple2<Long, Iterable<CSVRecord>>, Boolean>() {
             @Override
             public Boolean call(Tuple2<Long, Iterable<CSVRecord>> v1) throws Exception {
-                long count = StreamSupport.stream(v1._2().spliterator(),false).count();
-                return  count < ReduceNofTrajectories.MAX_TRAJECTORY_SIZE ? true : false;
+                long count = StreamSupport.stream(v1._2().spliterator(), false).count();
+                return count < ReduceNofTrajectories.MAX_TRAJECTORY_SIZE ? true : false;
             }
-        }). sample(false, 0.0001).mapValues(new CSVRecordToTrajectory()).flatMapValues(new Function<Trajectory, Iterable<Query>>() {
+        }).sample(false, 0.0001).mapValues(new CSVRecordToTrajectory()).flatMapValues(new Function<Trajectory, Iterable<Query>>() {
             @Override
             public Iterable<Query> call(Trajectory trajectory) throws Exception {
 
@@ -146,31 +150,28 @@ public class HorizontalPartitioning {
         });
 
 
-
-        List<Integer> lengthList=queries.mapToPair(new PairFunction<Tuple2<Integer, Query>, Long, Query>() {
+        List<Integer> lengthList = queries.mapToPair(new PairFunction<Tuple2<Integer, Query>, Long, Query>() {
             @Override
             public Tuple2<Long, Query> call(Tuple2<Integer, Query> integerQueryTuple2) throws Exception {
-                return new Tuple2<>(integerQueryTuple2._2().getQueryID(),integerQueryTuple2._2());
+                return new Tuple2<>(integerQueryTuple2._2().getQueryID(), integerQueryTuple2._2());
             }
         }).groupByKey().mapValues(new Function<Iterable<Query>, Integer>() {
             @Override
             public Integer call(Iterable<Query> v1) throws Exception {
-                int sum=0;
-                for (Query q:v1) {
-                    sum+=q.getPathSegments().size();
+                int sum = 0;
+                for (Query q : v1) {
+                    sum += q.getPathSegments().size();
                 }
                 return sum;
             }
         }).values().collect();
-        Stats.printStats(lengthList);
+//        Stats.printStats(lengthList);
+//        Stats.nofQueriesInEachTimeSlice(queries);
 
-
-        Stats.nofQueriesInEachTimeSlice(queries);
-
-        JavaRDD<Long> queryKeys=queries.mapToPair(new PairFunction<Tuple2<Integer,Query>, Long, Integer>() {
+        JavaRDD<Long> queryKeys = queries.mapToPair(new PairFunction<Tuple2<Integer, Query>, Long, Integer>() {
             @Override
             public Tuple2<Long, Integer> call(Tuple2<Integer, Query> t) throws Exception {
-                return new Tuple2<Long, Integer>(t._2().getQueryID(),1);
+                return new Tuple2<Long, Integer>(t._2().getQueryID(), 1);
             }
         }).groupByKey().keys();
 //                queries.groupBy(new Function<Tuple2<Integer, Query>, Integer>() {
@@ -181,21 +182,26 @@ public class HorizontalPartitioning {
 //        }).
 
 
-
         System.out.println("nofQueries:" + queryKeys.count());
-        JavaPairRDD<Integer, Trie> partitionedTries = trieRDD.partitionBy(new IntegerPartitioner()).persist(StorageLevel.MEMORY_ONLY());
-        JavaPairRDD<Integer, Query> partitionedQueries = queries.partitionBy(new IntegerPartitioner()).persist(StorageLevel.MEMORY_ONLY());
+        JavaPairRDD<Integer, Trie> partitionedTries = trieRDD.partitionBy(new IntegerPartitioner(horizontalPartitionSize)).persist(StorageLevel.MEMORY_ONLY());
+        JavaPairRDD<Integer, Query> partitionedQueries = queries.partitionBy(new IntegerPartitioner(horizontalPartitionSize)).persist(StorageLevel.MEMORY_ONLY());
 
 
-        Stats.nofTriesInPartitions(partitionedTries);
-
+//        System.out.println("nofTries::"+partitionedTries.keys().collect().size());
+//        Stats.nofTriesInPartitions(trieRDD);
 
         JavaPairRDD<Long, Long> resultSet =
 //        JavaRDD<Tuple2<Long,Set< Long>>> resultSet =
                 partitionedTries.join(partitionedQueries).mapValues(new Function<Tuple2<Trie, Query>, Tuple2<Long, Set<Long>>>() {
                     @Override
                     public Tuple2<Long, Set<Long>> call(Tuple2<Trie, Query> v1) throws Exception {
-                        return new Tuple2<>(v1._2().getQueryID(), v1._1().queryIndex(v1._2()));
+                        long t1 = System.nanoTime();
+                        Tuple2<Long, Set<Long>> ans = new Tuple2<>(v1._2().getQueryID(), v1._1().queryIndex(v1._2()));
+                        long t2 = System.nanoTime();
+                        long diff = t2 - t1;
+                        joinTimeAcc.add(diff * Math.pow(10.0, -9.0));
+                        ;
+                        return ans;
                     }
                 }).values().groupBy(new QueryIDSelector()).flatMapValues(new Function<Iterable<Tuple2<Long, Set<Long>>>, Iterable<Long>>() {
                     @Override
@@ -217,9 +223,8 @@ public class HorizontalPartitioning {
             System.out.println(qID_trajID);
         }
         System.out.println("resultCollection.size():" + resultCollection.size());
-        System.out.println("MaxTrajLength:"+HCSVRecToTrajME.max);
+        System.out.println("MaxTrajLength:" + HCSVRecToTrajME.max);
     }
-
 
 
 }
@@ -243,3 +248,32 @@ public class HorizontalPartitioning {
 //                return answer;
 //            }
 //        });
+
+
+
+// writing queries to file
+//    List<Tuple2<Long, Iterable<CSVRecord>>> allRecords = recordSample.collect();
+//
+//        System.out.println("recordSample.count():" + recordSample.groupByKey().keys().count());
+//                try {
+//                BufferedWriter bf = new BufferedWriter (new FileWriter(new File("queryRecords.csv")));
+//
+//                for (Tuple2<Long, Iterable<CSVRecord>> tuple : allRecords) {
+//
+//
+//        Iterable<CSVRecord> trajectory = tuple._2();
+//
+//
+//        for (CSVRecord csvRec : trajectory) {
+//
+//        bf.write(csvRec.getTrajID()+", "+csvRec.getTimestamp()+", "+ csvRec.getRoadSegment()+"\n");
+//
+//        }
+//        }
+//
+//        bf.close();
+//        } catch (java.io.IOException e) {
+//        e.printStackTrace();
+//        }
+//        finally {
+//        }

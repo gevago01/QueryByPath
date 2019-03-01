@@ -16,6 +16,7 @@ public class Connection implements Serializable {
         return (o instanceof Connection) && getDestination().getWord()==((Connection) o).getDestination().getWord();
     }
 
+
     @Override
     public int hashCode(){
 //        System.out.println("hashCode called");

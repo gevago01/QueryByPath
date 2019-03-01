@@ -13,6 +13,7 @@ public class Query implements Serializable {
     public int timeSlice;
     private int horizontalPartition = -1;
     public List<Long> pathSegments = new LongArrayList();
+    private int verticalID;
 
     public Query(long startingTime, long endingTime, List<Long> roadSegments) {
         this.startingTime=startingTime;
@@ -107,4 +108,11 @@ public class Query implements Serializable {
         this.horizontalPartition = horizontalPartition;
     }
 
+    public void setVerticalID(int verticalID) {
+        this.verticalID = verticalID;
+    }
+
+    public int getVerticalID() {
+        return verticalID;
+    }
 }

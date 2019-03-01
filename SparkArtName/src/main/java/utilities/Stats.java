@@ -124,4 +124,26 @@ public class Stats {
 
         System.out.println("nofQueriesInEachTimeSlice::"+list);
     }
+
+    public static void nofQueriesInEachVerticalPartition(JavaPairRDD<Integer, Query> queries) {
+
+        List<Tuple2<Integer, Integer>> list=queries.mapToPair(new PairFunction<Tuple2<Integer, Query>, Integer, Integer>() {
+            @Override
+            public Tuple2<Integer, Integer> call(Tuple2<Integer, Query> integerQueryTuple2) throws Exception {
+                return new Tuple2<>(integerQueryTuple2._2().getVerticalID()%Parallelism.PARALLELISM,1);
+            }
+        }).reduceByKey(new Function2<Integer, Integer, Integer>() {
+            @Override
+            public Integer call(Integer v1, Integer v2) throws Exception {
+                return v1+v2;
+            }
+        }).collect();
+
+        System.out.println("nofQueriesInEachTimeSlice::"+list);
+    }
+
+//    public static void nofTriesInPartitions(JavaPairRDD<Long, Trie> partitionedTries) {
+//        partitionedTries.mapPartitions(new FlatMapFunction<Iterator<Tuple2<Long,Trie>>, Tuple2<Integer, Integer>>() {
+//        })
+//    }
 }

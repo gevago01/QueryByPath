@@ -11,9 +11,16 @@ import utilities.Parallelism;
  * and the Time Slicing methods
  */
 public class IntegerPartitioner extends Partitioner {
+
+    private int numOfPartitions;
+    public IntegerPartitioner(int numOfPartitions ) {
+        this.numOfPartitions=numOfPartitions;
+    }
+
     @Override
     public int numPartitions() {
-        return Parallelism.PARALLELISM;
+        return numOfPartitions;
+//        return Parallelism.PARALLELISM;
     }
 
     @Override

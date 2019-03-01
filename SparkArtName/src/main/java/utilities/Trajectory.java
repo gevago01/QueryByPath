@@ -13,6 +13,8 @@ import java.util.Map;
 public class Trajectory  implements Serializable{
 
 
+    private int verticalID;
+
     public int getHorizontalID() {
         return horizontalID;
     }
@@ -133,5 +135,13 @@ public class Trajectory  implements Serializable{
 
         assert (!timeSlices.isEmpty());
         return timeSlices;
+    }
+
+    public void setVerticalID(int verticalID) {
+        this.verticalID = verticalID;
+    }
+
+    public int getVerticalID() {
+        return verticalID;
     }
 }
