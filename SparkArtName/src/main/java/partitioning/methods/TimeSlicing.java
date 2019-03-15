@@ -127,6 +127,7 @@ public class TimeSlicing {
                 return trieList;
             }
         });
+        trieDataset.count();
         System.out.println("Done. Tries build");
         //done with records - unpersist
 //        Query q = new Query(trajectory.getStartingTime(), trajectory.getEndingTime(), trajectory.roadSegments);
@@ -141,19 +142,19 @@ public class TimeSlicing {
         JavaPairRDD<Integer, Query> queries =
                 queryRecords.groupByKey().mapValues(new CSVRecToTrajME()).map(t -> new Query(t._2(), timePeriods)).mapToPair(q -> new Tuple2<>(q.getTimeSlice(), q));
 
+        queries.count();
 
 //        Broadcast<Map<Integer, Query>> broadcastedQueries = sc.broadcast(queries.collectAsMap());
         System.out.println("nofQueries:" + queries.count());
         System.out.println("appName:" + appName);
-        JavaPairRDD<Integer, Trie> partitionedTries = trieDataset.partitionBy(new IntegerPartitioner(numberOfSlices)).persist(StorageLevel.MEMORY_ONLY());
-        partitionedTries.count();
-
-        JavaPairRDD<Integer, Query> partitionedQueries = queries.partitionBy(new IntegerPartitioner(numberOfSlices)).persist(StorageLevel.MEMORY_ONLY());
-        partitionedQueries.count();
+//        JavaPairRDD<Integer, Trie> partitionedTries = trieDataset.partitionBy(new IntegerPartitioner(numberOfSlices)).persist(StorageLevel.MEMORY_ONLY());
+//        partitionedTries.count();
+//        JavaPairRDD<Integer, Query> partitionedQueries = queries.partitionBy(new IntegerPartitioner(numberOfSlices)).persist(StorageLevel.MEMORY_ONLY());
+//        partitionedQueries.count();
 //        Stats.nofQueriesInEachTimeSlice(partitionedQueries);
 //        Stats.nofTriesInPartitions(partitionedTries);
 
-        JavaPairRDD<Integer, Set<Integer>> resultSetRDD = partitionedTries.join(partitionedQueries).mapValues(new Function<Tuple2<Trie, Query>, Set<Integer>>() {
+        JavaPairRDD<Integer, Set<Integer>> resultSetRDD = trieDataset.join(queries).mapValues(new Function<Tuple2<Trie, Query>, Set<Integer>>() {
             @Override
             public Set<Integer> call(Tuple2<Trie, Query> trieQueryTuple) throws Exception {
 
