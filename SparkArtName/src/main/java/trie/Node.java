@@ -1,5 +1,7 @@
 package trie;
 
+import it.unimi.dsi.fastutil.ints.Int2IntAVLTreeMap;
+import it.unimi.dsi.fastutil.longs.Long2IntAVLTreeMap;
 import it.unimi.dsi.fastutil.longs.Long2LongAVLTreeMap;
 import utilities.Connection;
 import utilities.NodeRef;
@@ -12,57 +14,36 @@ import java.util.TreeMap;
 
 public class Node implements Serializable {
 
-    private TreeMap<Long, Connection> children = new TreeMap<>();
-//    private TreeMap<Long, Node> children = new TreeMap<>();
+    private TreeMap<Integer, Connection> children = new TreeMap<>();
 
-    private Long2LongAVLTreeMap timeToTID = new Long2LongAVLTreeMap();
+    private Long2IntAVLTreeMap timeToTID = new Long2IntAVLTreeMap();
     private int level = 0;
-    private long word;
+    private int word;
     public void setLevel(int level) {
         this.level = level;
     }
-    private int asd;
 
-
-//    public Collection<Node> getNodes() {
-//        Set<Node> setOfNodes = new TreeSet<>();
-//        Collection<Connection> allConnections = children.values();
-//
-//        for (Connection c : allConnections) {
-//            setOfNodes.add(c.getDestination());
-//        }
-//        return setOfNodes;
-//    }
-
-    public long getWord() {
+    public int getWord() {
 
         return word;
     }
 
-    public void setWord(long word) {
+    public void setWord(int word) {
         this.word = word;
     }
 
 
-    private Node(long newWord) {
+    private Node(int newWord) {
         word = newWord;
     }
 
-    public static Node getNode(long newWord) {
+    public static Node getNode(int newWord) {
 
         return new Node(newWord);
     }
 
-//    public Connection getConnection(String dummyConnection){
-//            for (Connection c:children){
-//                if (c.getDestination().getWord().equals(dummyConnection)){
-//                    return c;
-//                }
-//            }
-//        return null;
-//    }
 
-    public Node getChildren(Long roadSegment) {
+    public Node getChildren(int roadSegment) {
         //list implementation
 //        for (Node n:children) {
 //            if (n.getWord()==roadSegment){
@@ -78,7 +59,7 @@ public class Node implements Serializable {
         return connection == null ? null : connection.getDestination();
     }
 
-    public Node addChild(long newWord) {
+    public Node addChild(int newWord) {
 //        Node n = getNode(newWord.intern());
         Node n = getNode(newWord);
         n.setLevel(level + 1);
@@ -91,14 +72,14 @@ public class Node implements Serializable {
         return n;
     }
 
-    public void addTrajectory(long timestamp, long trajectoryID) {
+    public void addTrajectory(long timestamp, int trajectoryID) {
         timeToTID.put(timestamp, trajectoryID);
 
     }
 
     //    public Set<Long> getTrajectories(long startingTime, long endingTime) {
-    public Collection<Long> getTrajectories(long startingTime, long endingTime) {
-        SortedMap<Long, Long> entries = timeToTID.subMap(startingTime, endingTime);
+    public Collection<Integer> getTrajectories(long startingTime, long endingTime) {
+        SortedMap<Long, Integer> entries = timeToTID.subMap(startingTime, endingTime);
 
         return entries.values();
     }

@@ -14,11 +14,11 @@ public class NodeRef implements Serializable{
 //    private transient Node node;
     private  Node node;
 
-    public long getUid() {
+    public int getUid() {
         return uid;
     }
 
-    private final long uid;
+    private final int uid;
 //    public static TreeMap<Long, Node> nodePool = new TreeMap<>();
 
     public NodeRef(Node node) {
@@ -41,7 +41,7 @@ public class NodeRef implements Serializable{
 
     @Override
     public int hashCode() {
-        return Long.hashCode(uid);
+        return Integer.hashCode(uid);
     }
 
 }

@@ -10,9 +10,14 @@ import utilities.Parallelism;
  * for partitioning the road segment ids
  */
 public class LongPartitioner extends Partitioner {
+    private int numOfPartitions;
+
+    public LongPartitioner(int numOfPartitions){
+        this.numOfPartitions=numOfPartitions;
+    }
     @Override
     public int numPartitions() {
-        return Parallelism.PARALLELISM;
+        return numOfPartitions;
     }
 
     @Override

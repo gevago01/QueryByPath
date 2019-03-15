@@ -2,6 +2,7 @@ package utilities;
 
 
 import com.google.common.collect.Lists;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 
 import java.io.Serializable;
@@ -13,16 +14,21 @@ import java.util.Map;
 public class Trajectory  implements Serializable{
 
 
-    private int verticalID;
+    private long verticalID;
 
     public int getHorizontalID() {
         return horizontalID;
     }
     private int horizontalID;
-    public long getTrajectoryID() {
+    public int getTrajectoryID() {
         return trajectoryID;
     }
-    public long trajectoryID;
+    public int trajectoryID;
+
+    public LongArrayList getTimestamps() {
+        return timestamps;
+    }
+
     public LongArrayList timestamps = new LongArrayList();
     public long getStartingTime() {
         return startingTime;
@@ -33,23 +39,23 @@ public class Trajectory  implements Serializable{
     private long startingTime;
     private long endingTime;
 
-    public LongArrayList getRoadSegments() {
+    public IntArrayList getRoadSegments() {
         return roadSegments;
     }
 
-    public LongArrayList roadSegments = new LongArrayList();
+    public IntArrayList roadSegments = new IntArrayList();
     public Integer timeSlice = 0;
 
 
     public void setTimeSlice(Integer timeSlice) {
         this.timeSlice = timeSlice;
     }
-    public Long getStartingRS(){
+    public int getStartingRS(){
         return roadSegments.get(0);
     }
 
 
-    public void addRoadSegment(Long roadSegment) {
+    public void addRoadSegment(int roadSegment) {
 //        roadSegments.add(roadSegment.intern());
         roadSegments.add(roadSegment);
     }
@@ -81,12 +87,12 @@ public class Trajectory  implements Serializable{
     }
 
 
-    public Trajectory(Long trajectoryID) {
+    public Trajectory(int trajectoryID) {
         this.trajectoryID = trajectoryID;
     }
 
 
-    public void addSample(Long timestamp, Long roadID) {
+    public void addSample(Long timestamp, int roadID) {
 
         timestamps.add(timestamp);
 //        roadSegments.add(roadID.intern());
@@ -137,11 +143,11 @@ public class Trajectory  implements Serializable{
         return timeSlices;
     }
 
-    public void setVerticalID(int verticalID) {
+    public void setVerticalID(long verticalID) {
         this.verticalID = verticalID;
     }
 
-    public int getVerticalID() {
+    public long getVerticalID() {
         return verticalID;
     }
 }

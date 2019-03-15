@@ -7,11 +7,11 @@ import java.io.Serializable;
  */
 public class CSVRecord implements Serializable {
 
-    long trajID;
+    int trajID;
     long timestamp;
-    long roadSegment;
+    int roadSegment;
 
-    public long getTrajID() {
+    public int getTrajID() {
         return trajID;
     }
 
@@ -19,7 +19,7 @@ public class CSVRecord implements Serializable {
         return timestamp;
     }
 
-    public long getRoadSegment() {
+    public int getRoadSegment() {
         return roadSegment;
     }
 
@@ -35,9 +35,9 @@ public class CSVRecord implements Serializable {
 
     public CSVRecord(String trajectoryID, String timestampStr, String roadSegmentId) {
 
-        trajID=Long.parseLong(trajectoryID.trim());
+        trajID=Integer.parseInt(trajectoryID.trim());
         timestamp=Long.parseLong(timestampStr.trim());
-        roadSegment=Long.parseLong(roadSegmentId.trim());
+        roadSegment=Integer.parseInt(roadSegmentId.trim());
 
     }
 }

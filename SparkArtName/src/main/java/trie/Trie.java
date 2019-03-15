@@ -7,11 +7,11 @@ import java.io.Serializable;
 import java.util.*;
 
 public class Trie implements Serializable {
-    private Node root = Node.getNode(Long.MAX_VALUE);
-    private long startingRoadSegment = Long.MAX_VALUE;
+    private Node root = Node.getNode(Integer.MAX_VALUE);
+    private int startingRoadSegment = Integer.MAX_VALUE;
     public int timeSlice;
     private int horizontalTrieID;
-    private int verticalID;
+    private long verticalID;
 
     public int getTrajectoryCounter() {
         return trajectoryCounter;
@@ -22,7 +22,7 @@ public class Trie implements Serializable {
 
 
 
-    public void setStartingRoadSegment(long startingRoadSegment) {
+    public void setStartingRoadSegment(int startingRoadSegment) {
         this.startingRoadSegment = startingRoadSegment;
     }
 
@@ -44,19 +44,19 @@ public class Trie implements Serializable {
     }
 
 
-    public void insertTrajectory2(List<Long> roadSegments, long trajectoryID, long startingTime, long endingTime) {
+    public void insertTrajectory2(List<Integer> roadSegments, int trajectoryID, long startingTime, long endingTime) {
         Node currentNode, child = root;
-        Long previousRoadSegment = -1l;
+        int previousRoadSegment = -1;
 
 
-        if (startingRoadSegment == Long.MAX_VALUE) {
+        if (startingRoadSegment == Integer.MAX_VALUE) {
             //this is only used for vertical partitioning
             startingRoadSegment = roadSegments.get(0);//.intern();
         }
 
         getRoot().addTrajectory(startingTime, trajectoryID);
         for (int i = 0; i < roadSegments.size(); i++) {
-            long roadSegment = roadSegments.get(i);//.intern();
+            int roadSegment = roadSegments.get(i);//.intern();
             if (roadSegment == previousRoadSegment) {
                 continue;
             }
@@ -127,8 +127,8 @@ public class Trie implements Serializable {
      *
      * @return
      */
-    public long getStartingRS() {
-        if (startingRoadSegment == Long.MAX_VALUE) {
+    public int getStartingRS() {
+        if (startingRoadSegment == Integer.MAX_VALUE) {
             System.err.println("Wrong Usage. Insert trajectories to the trie first.");
             System.exit(-2);
         }
@@ -143,15 +143,15 @@ public class Trie implements Serializable {
      * @param q
      * @return
      */
-    public Set<Long> queryIndex(Query q) {
+    public Set<Integer> queryIndex(Query q) {
 
 
         Node currentNode = root;
-        Set<Long> answer = new TreeSet<>();
+        Set<Integer> answer = new TreeSet<>();
 
         for (int i = 0; i < q.getPathSegments().size(); i++) {
 
-            long roadSegment = q.getPathSegments().get(i);
+            int roadSegment = q.getPathSegments().get(i);
 
 
             if (currentNode.getWord()==(roadSegment)) {
@@ -161,7 +161,7 @@ public class Trie implements Serializable {
 
             if (child == null) {
                 //no matching result
-//                System.err.println("no matching result");
+                System.err.println("no matching result");
 //                System.exit(1);
                 break;
             }
@@ -199,11 +199,11 @@ public class Trie implements Serializable {
         insertTrajectory2(traj.roadSegments, traj.trajectoryID, traj.getStartingTime(), traj.getEndingTime());
     }
 
-    public void setVerticalID(int verticalID) {
+    public void setVerticalID(long verticalID) {
         this.verticalID = verticalID;
     }
 
-    public int getVerticalID() {
+    public long getVerticalID() {
         return verticalID;
     }
 }

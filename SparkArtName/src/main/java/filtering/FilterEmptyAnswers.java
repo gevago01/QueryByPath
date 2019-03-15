@@ -8,9 +8,9 @@ import java.util.Set;
 /**
  * Created by giannis on 11/01/19.
  */
-public class FilterEmptyAnswers implements Function<Tuple2<Integer, Set<Long>>, Boolean> {
+public class FilterEmptyAnswers implements Function<Tuple2<Integer, Set<Integer>>, Boolean> {
     @Override
-    public Boolean call(Tuple2<Integer, Set<Long>> v1) throws Exception {
+    public Boolean call(Tuple2<Integer, Set<Integer>> v1) throws Exception {
         return v1._2().isEmpty() ? false : true;
     }
 }

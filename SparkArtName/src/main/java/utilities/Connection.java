@@ -19,9 +19,7 @@ public class Connection implements Serializable {
 
     @Override
     public int hashCode(){
-//        System.out.println("hashCode called");
-
-        return Long.hashCode(destination.resolve().getWord());
+        return Integer.hashCode(destination.resolve().getWord());
     }
     public Node getDestination() {
         return destination.resolve();
