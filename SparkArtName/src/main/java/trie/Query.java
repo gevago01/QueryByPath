@@ -14,6 +14,7 @@ import java.util.Random;
 public class Query implements Serializable {
 
     private int queryID;
+    private static int counter;
     private long startingTime, endingTime;
     public int timeSlice;
     private int horizontalPartition = -1;
@@ -22,7 +23,10 @@ public class Query implements Serializable {
 
     public Query(Trajectory t, List<Integer> roadIntervals, PartitioningMethods pm) {
 
+
         this(t.getStartingTime(),t.getEndingTime(),t.roadSegments);
+//        queryID=counter++;
+
         if (pm == PartitioningMethods.VERTICAL) {
 //            int x = new StartingRSPartitioner(roadIntervals,0).getPartition(t.roadSegments.get(0));
 //            verticalID = x;

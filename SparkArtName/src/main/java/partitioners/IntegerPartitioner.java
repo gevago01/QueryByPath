@@ -12,15 +12,13 @@ import utilities.Parallelism;
  */
 public class IntegerPartitioner extends Partitioner {
 
-    private int numOfPartitions;
-    public IntegerPartitioner(int numOfPartitions ) {
-        this.numOfPartitions=numOfPartitions;
+    public IntegerPartitioner() {
     }
 
     @Override
     public int numPartitions() {
-        return numOfPartitions;
-//        return Parallelism.PARALLELISM;
+//        return numOfPartitions;
+        return Parallelism.PARALLELISM;
     }
 
     @Override

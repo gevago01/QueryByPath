@@ -1,6 +1,7 @@
 package partitioners;
 
 import org.apache.spark.Partitioner;
+import utilities.Parallelism;
 
 import java.util.List;
 
@@ -38,7 +39,8 @@ public class StartingRSPartitioner extends Partitioner {
 
     @Override
     public int numPartitions() {
-        return 1;
+//        return 1;
+        return Parallelism.PARALLELISM;
     }
 
     //    @Override

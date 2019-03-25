@@ -145,7 +145,6 @@ public class Trie implements Serializable {
      */
     public Set<Integer> queryIndex(Query q) {
 
-
         Node currentNode = root;
         Set<Integer> answer = new TreeSet<>();
 
@@ -161,7 +160,7 @@ public class Trie implements Serializable {
 
             if (child == null) {
                 //no matching result
-                System.err.println("no matching result");
+//                System.err.println("no matching result");
 //                System.exit(1);
                 break;
             }
