@@ -10,14 +10,10 @@ public class LineToCSVRec implements Function<String, CSVRecord> {
     @Override
     public CSVRecord call(String s) throws Exception {
         String[] tokens = s.split(",");
-        CSVRecord c=null;
-        try {
-            c=new CSVRecord(tokens[0], tokens[1], tokens[2]);
-        }
-        catch (ArrayIndexOutOfBoundsException e){
-            e.printStackTrace();
-            System.err.println("Error in LineToCSVRec");
-        }
+        CSVRecord c;
+
+        c = new CSVRecord(tokens[0], tokens[1], tokens[2]);
+
 
         return c;
     }

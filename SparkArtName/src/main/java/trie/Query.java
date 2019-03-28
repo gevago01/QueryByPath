@@ -19,7 +19,7 @@ public class Query implements Serializable {
     public int timeSlice;
     private int horizontalPartition = -1;
     public IntArrayList pathSegments = new IntArrayList();
-//    private int verticalID;
+    private int verticalID;
 
     public Query(Trajectory t, List<Integer> roadIntervals, PartitioningMethods pm) {
 
@@ -28,8 +28,8 @@ public class Query implements Serializable {
 //        queryID=counter++;
 
         if (pm == PartitioningMethods.VERTICAL) {
-//            int x = new StartingRSPartitioner(roadIntervals,0).getPartition(t.roadSegments.get(0));
-//            verticalID = x;
+            int x = new StartingRSPartitioner(roadIntervals,0).getPartition2(t.roadSegments.get(0));
+            verticalID = x;
         }
         else if (pm == PartitioningMethods.TIME_SLICING) {
             List<Integer> timeSlices=determineTimeSlice(roadIntervals);
@@ -175,10 +175,10 @@ public class Query implements Serializable {
         this.horizontalPartition = horizontalPartition;
     }
 
-//    public void setVerticalID(int verticalID) {
-//        this.verticalID = verticalID;
-//    }
-//    public long getVerticalID() {
-//        return verticalID;
-//    }
+    public void setVerticalID(int verticalID) {
+        this.verticalID = verticalID;
+    }
+    public int getVerticalID() {
+        return verticalID;
+    }
 }

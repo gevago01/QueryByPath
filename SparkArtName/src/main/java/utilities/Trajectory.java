@@ -14,7 +14,7 @@ import java.util.Map;
 public class Trajectory  implements Serializable{
 
 
-    private long verticalID;
+    private int verticalID;
 
     public int getHorizontalID() {
         return horizontalID;
@@ -44,6 +44,11 @@ public class Trajectory  implements Serializable{
     }
 
     public IntArrayList roadSegments = new IntArrayList();
+
+    public Integer getTimeSlice() {
+        return timeSlice;
+    }
+
     public Integer timeSlice = 0;
 
 
@@ -143,11 +148,11 @@ public class Trajectory  implements Serializable{
         return timeSlices;
     }
 
-    public void setVerticalID(long verticalID) {
+    public void setVerticalID(int verticalID) {
         this.verticalID = verticalID;
     }
 
-    public long getVerticalID() {
+    public int getVerticalID() {
         return verticalID;
     }
 }

@@ -20,22 +20,17 @@ public class StartingRSPartitioner extends Partitioner {
 
     }
 
-//    public int getPartition(Long startingRS) {
-//
-////        for (int i = 0; i < roadIntervals.size()-1; i++) {
-////            if (startingRS >= roadIntervals.get(i) && startingRS <= roadIntervals.get(i + 1)) {
-////
-////                return i ;
-////            }
-////        }
-//        int x;
-//        try {
-//            x = Math.toIntExact(startingRS);
-//        } catch (ArithmeticException e) {
-//            x = Integer.MAX_VALUE;
-//        }
-//        return x;
-//    }
+    public int getPartition2(int startingRS) {
+
+        for (int i = 0; i < roadIntervals.size()-1; i++) {
+            if (startingRS >= roadIntervals.get(i) && startingRS <= roadIntervals.get(i + 1)) {
+
+                return i ;
+            }
+        }
+
+        return 0;
+    }
 
     @Override
     public int numPartitions() {
