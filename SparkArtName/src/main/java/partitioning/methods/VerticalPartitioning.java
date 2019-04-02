@@ -21,7 +21,11 @@ import trie.Query;
 import trie.Trie;
 import utilities.*;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -96,10 +100,8 @@ public class VerticalPartitioning {
 
         int nofVerticalSlices = Integer.parseInt(args[0]);
 //        String fileName = "file:///mnt/hgfs/VM_SHARED/samplePort.csv";
-//        String fileName= "file:///mnt/hgfs/VM_SHARED/trajDatasets/85TD.csv";
 //        String fileName = "file:////mnt/hgfs/VM_SHARED/trajDatasets/concatTrajectoryDataset.csv";
 //          String fileName= "file:////mnt/hgfs/VM_SHARED/trajDatasets/half.csv";
-//          String fileName= "file:////mnt/hgfs/VM_SHARED/trajDatasets/octant.csv";
 //        String fileName= "hdfs:////half.csv";
 //        String fileName= "hdfs:////85TD.csv";
 
@@ -111,14 +113,15 @@ public class VerticalPartitioning {
 //        String queryFile = "file:///mnt/hgfs/VM_SHARED/samplePort.csv";;
 //        String queryFile = "file:///mnt/hgfs/VM_SHARED/samplePort.csv";
 //        String queryFile = "file:///mnt/hgfs/VM_SHARED/trajDatasets/queryRecords.csv";
-//        String queryFile = "file:///mnt/hgfs/VM_SHARED/trajDatasets/queryRecordsOnesix.csv";
 //        String queryFile = "file:////data/queryRecords.csv";
-        String fileName = "hdfs:////concatTrajectoryDataset.csv";
 //        String fileName= "hdfs:////synth5GBDataset.csv";
 //        String queryFile = "hdfs:////queryRecords.csv";
 //        String queryFile = "hdfs:////200KqueryRecords.csv";
 //        String queryFile = "hdfs:////queryRecordsOnesix.csv";
+        String fileName = "hdfs:////concatTrajectoryDataset.csv";
         String queryFile = "hdfs:////200KqueryRecords.csv";
+//        String fileName= "hdfs:////onesix.csv";
+//        String queryFile = "hdfs:////onesix.csv";
 //        SparkConf conf = new SparkConf().setAppName(VerticalPartitioning.class.getSimpleName() + nofVerticalSlices)
 //                .setMaster("local[*]")
 //                .set("spark.executor.instances", "" + Parallelism.PARALLELISM);
@@ -141,7 +144,6 @@ public class VerticalPartitioning {
         JavaPairRDD<Integer, Query> queries =
                 queryRecords.groupByKey().mapValues(new CSVRecToTrajME()).map(t -> new Query(t._2(), roadIntervals, PartitioningMethods.VERTICAL)).mapToPair(q -> new Tuple2<>(q.getVerticalID(), q));
 
-        queries.count();
         System.out.println("nofQueries:"+queries.count());
 
 
@@ -156,62 +158,45 @@ public class VerticalPartitioning {
             }
         });//.filter(new ReduceNofTrajectories());
 
-//
-
-
-
+        trajectoryDataset.count();
         System.out.println("Done. Trajectories build");
 
-        JavaPairRDD<Integer, Trie> trieRDD =
-                trajectoryDataset.groupByKey().mapValues(new Function<Iterable<Trajectory>, Trie>() {
-                    @Override
-                    public Trie call(Iterable<Trajectory> trajectories) throws Exception {
-                        Trie trie = new Trie();
 
-                        for (Trajectory traj : trajectories) {
-                            trie.insertTrajectory2(traj);
-                            trie.setVerticalID(traj.getVerticalID());
-//                            trie.setStartingRoadSegment(traj.getStartingRS());
+        List<Integer> partitions = IntStream.range(0, nofVerticalSlices).boxed().collect(toList());
+        JavaRDD<Integer> partitionsRDD = sc.parallelize(partitions);
+        JavaPairRDD<Integer, Trie> emptyTrieRDD = partitionsRDD.mapToPair(new PairFunction<Integer, Integer, Trie>() {
+            @Override
+            public Tuple2<Integer, Trie> call(Integer verticalID) throws Exception {
+                Trie t = new Trie();
+                t.setVerticalID(verticalID);
+                return new Tuple2<>(verticalID, t);
+            }
+        });
+
+        Stats.nofQueriesOnEachNode(queries, PartitioningMethods.VERTICAL);
+        Stats.nofTrajsOnEachNode(trajectoryDataset,PartitioningMethods.VERTICAL);
+
+        JavaPairRDD<Integer, Trie> trieRDD=
+                emptyTrieRDD.groupWith(trajectoryDataset).mapValues(new Function<Tuple2<Iterable<Trie>, Iterable<Trajectory>>, Trie>() {
+                    @Override
+                    public Trie call(Tuple2<Iterable<Trie>, Iterable<Trajectory>> v1) throws Exception {
+                        Trie trie=v1._1().iterator().next();
+                        for (Trajectory trajectory: v1._2()){
+                            trie.insertTrajectory2(trajectory);
                         }
                         return trie;
                     }
                 });
 
-//        JavaPairRDD<Integer, Trie> trieRDD =
-//                trajectoryDataset.groupByKey().flatMapValues(new Function<Iterable<Trajectory>, Iterable<Trie>>() {
-//                    @Override
-//                    public Iterable<Trie> call(Iterable<Trajectory> trajectories) throws Exception {
-//                        List<Trie> trieList = new ArrayList<>();
-//                        Trie trie = new Trie();
-//
-//                        for (Trajectory traj : trajectories) {
-//                            trie.insertTrajectory2(traj);
-//                            trie.setVerticalID(traj.getVerticalID());
-////                            trie.setStartingRoadSegment(traj.getStartingRS());
-//                        }
-//                        trieList.add(trie);
-//                        return trieList;
-//                    }
-//                });
+
+        System.out.println("nofTries:"+trieRDD.count());
 
 
-        JavaPairRDD<Integer, Trie> partitionedTries = trieRDD.partitionBy(new StartingRSPartitioner(roadIntervals, nofVerticalSlices)).persist(StorageLevel.MEMORY_ONLY());
-        System.out.println("nofTries:" + partitionedTries.count());
 
 
-        System.out.println("TrieNofPartitions:" + partitionedTries.rdd().partitions().length);
-
-//        partitionedTries.foreach(t -> System.out.println(t));
-//        partitionedQueries.foreach(t -> System.out.println(t));
-//        Stats.nofTriesInPartitions(trieRDD);
-//        Stats.nofQueriesInEachVerticalPartition(partitionedQueries);
-//        Stats.nofTriesInPartitions(partitionedTries);
-//        System.out.println("nofTries::" + partitionedTries.values().collect().size());
 
 
-//        partitionedTries.cache();
-//        partitionedQueries.cache();
-
+        System.out.println("TrieNofPartitions:" + trieRDD.rdd().partitions().length);
 
 //
 //        List<Set<Integer>> collectedResult = resultSet.values().collect();
@@ -222,7 +207,7 @@ public class VerticalPartitioning {
 
         Broadcast<List<Tuple2<Integer, Query>>> partBroadQueries = sc.broadcast(queries.collect());
         JavaRDD<Set<Integer>> resultSet =
-                partitionedTries.map(new Function<Tuple2<Integer, Trie>, Set<Integer>>() {
+                trieRDD.map(new Function<Tuple2<Integer, Trie>, Set<Integer>>() {
                     @Override
                     public Set<Integer> call(Tuple2<Integer, Trie> v1) throws Exception {
                         List<Tuple2<Integer, Query>> localQueries = partBroadQueries.value();
@@ -234,7 +219,6 @@ public class VerticalPartitioning {
                                 long t1 = System.nanoTime();
                                 Set<Integer> ans = v1._2().queryIndex(queryEntry._2());
                                 long t2 = System.nanoTime();
-
                                 long diff = t2 - t1;
                                 joinTimeAcc.add(diff * Math.pow(10.0, -9.0));
                                 answer.addAll(ans);
@@ -264,64 +248,3 @@ public class VerticalPartitioning {
 
 
 }
-
-
-//        JavaPairRDD<Integer, Set<Integer>> resultSet = partitionedTries.join(partitionedQueries).mapValues(new Function<Tuple2<Trie, Query>, Set<Integer>>() {
-//            @Override
-//            public Set<Integer> call(Tuple2<Trie, Query> trieQueryTuple2) throws Exception {
-////                long t1 = System.nanoTime();
-//                Set<Integer> result = trieQueryTuple2._1().queryIndex(trieQueryTuple2._2());
-////                long t2 = System.nanoTime();
-////                long diff = t2 - t1;
-////                System.out.println("queryIndexTime:" + diff);
-////                joinTimeAcc.add(diff * Math.pow(10.0, -9.0));
-//                return result;
-//            }
-//        });
-
-
-
-//        JavaPairRDD<Integer, Trie> trieRDD =trajectoryDataset.repartitionAndSortWithinPartitions(new Partitioner() {
-//            @Override
-//            public int getPartition(Object key) {
-//                Integer partKey = (Integer)key;
-//                return partKey;
-//            }
-//
-//            @Override
-//            public int numPartitions() {
-//                return 1;
-//            }
-//        }).mapPartitions(new FlatMapFunction<Iterator<Tuple2<Integer,Trajectory>>, Trie>() {
-//            @Override
-//            public Iterator<Trie> call(Iterator<Tuple2<Integer, Trajectory>> tuple2Iterator) throws Exception {
-//
-//                List<Trie> trieList = new ArrayList<>();
-//                Trie trie = new Trie();
-//
-//                for (Iterator<Tuple2<Integer, Trajectory>> it = tuple2Iterator; it.hasNext(); ) {
-//                    Tuple2<Integer, Trajectory> sd = it.next();
-//
-//                    trie.insertTrajectory2(sd._2());
-//                    trie.setStartingRoadSegment(sd._2().getStartingRS());
-//                }
-//                trieList.add(trie);
-//                return trieList.iterator();
-//            }
-//        }).mapToPair(new PairFunction<Trie, Integer, Trie>() {
-//            @Override
-//            public Tuple2<Integer, Trie> call(Trie trie) throws Exception {
-//                return new Tuple2<Integer, Trie>(trie.getStartingRS(), trie);
-//            }
-//        });
-
-//        trajectoryDataset.count();
-//                forEach(a -> System.out.println(a));
-//        trajectoryDataset.aggregateByKey()
-//        JavaPairRDD<Long, Trie> trieRDD = trajectoryDataset.combineByKey(new TrajectoryCombiner(), new MergeTrajectory(),new MergeTries(), new LongPartitioner()).mapToPair(new PairFunction<Tuple2<Long,Trie>, Long, Trie>() {
-//            @Override
-//            public Tuple2<Long, Trie> call(Tuple2<Long, Trie> longTrieTuple2) throws Exception {
-//                longTrieTuple2._2().insertAllTrajs();
-//                return longTrieTuple2;
-//            }
-//        });

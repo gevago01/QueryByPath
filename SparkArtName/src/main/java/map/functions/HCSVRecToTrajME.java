@@ -22,6 +22,12 @@ public class HCSVRecToTrajME implements Function<Iterable<CSVRecord>, Iterable<T
 
     public static int max=Integer.MIN_VALUE;
 
+//    public HCSVRecToTrajME(List<Long> intervals) {
+//        List<Trajectory> trajectoryList = new ArrayList<>();
+//        ArrayList<CSVRecord> csvRecordList = Lists.newArrayList(csvRecords);
+//
+//    }
+
     @Override
     public Iterable<Trajectory> call(Iterable<CSVRecord> csvRecords) throws Exception {
 

@@ -2,16 +2,13 @@ package utilities;
 
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.function.FlatMapFunction;
-import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
 import scala.Tuple2;
 import trie.Query;
 import trie.Trie;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by giannis on 14/01/19.
@@ -79,7 +76,7 @@ public class Stats {
     }
 
     public static void nofTriesInPartitions(final JavaPairRDD<Integer, Trie> partitionedTries) {
-        List<Tuple2<Integer, Integer>> list=
+        List<Tuple2<Integer, Integer>> list =
                 partitionedTries.mapPartitions(new FlatMapFunction<Iterator<Tuple2<Integer, Trie>>, Tuple2<Integer, Integer>>() {
                     @Override
                     public Iterator<Tuple2<Integer, Integer>> call(Iterator<Tuple2<Integer, Trie>> tuple2Iterator) throws Exception {
@@ -99,30 +96,122 @@ public class Stats {
                     }
                 })
                         .reduceByKey(new Function2<Integer, Integer, Integer>() {
-                    @Override
-                    public Integer call(Integer v1, Integer v2) throws Exception {
-                        return v1+v2;
-                    }
-                }).collect();
+                            @Override
+                            public Integer call(Integer v1, Integer v2) throws Exception {
+                                return v1 + v2;
+                            }
+                        }).collect();
 
-        System.out.println("nofTriesInPartitions::"+list);
+        System.out.println("nofTriesInPartitions::" + list);
     }
 
-    public static void nofQueriesInEachTimeSlice(JavaPairRDD<Integer, Query> queries) {
+    public static void nofQueriesOnEachNode(JavaPairRDD<Integer, Query> queries, PartitioningMethods method) {
 
-        List<Tuple2<Integer, Integer>> list=queries.mapToPair(new PairFunction<Tuple2<Integer, Query>, Integer, Integer>() {
+        List<Tuple2<Integer, Integer>> list = queries.mapToPair(new PairFunction<Tuple2<Integer, Query>, Integer, Integer>() {
             @Override
             public Tuple2<Integer, Integer> call(Tuple2<Integer, Query> integerQueryTuple2) throws Exception {
-                return new Tuple2<>(integerQueryTuple2._2().getTimeSlice()%Parallelism.PARALLELISM,1);
+                int number = getQueryPartitioningID(method, integerQueryTuple2);
+                return new Tuple2<>(number % Parallelism.PARALLELISM, 1);
             }
         }).reduceByKey(new Function2<Integer, Integer, Integer>() {
             @Override
             public Integer call(Integer v1, Integer v2) throws Exception {
-                return v1+v2;
+                return v1 + v2;
             }
         }).collect();
 
-        System.out.println("nofQueriesInEachTimeSlice::"+list);
+        System.out.println("nofQueriesOnEachNode::" + list);
+    }
+
+    private static int getPartitioningID(PartitioningMethods method, Tuple2<Integer, Trajectory> integerQueryTuple2) {
+        int number ;
+        if (method == PartitioningMethods.VERTICAL) {
+            number = integerQueryTuple2._2().getVerticalID();
+        } else if (method == PartitioningMethods.HORIZONTAL) {
+            number = integerQueryTuple2._2().getHorizontalID();
+        } else {
+            number = integerQueryTuple2._2().getTimeSlice();
+        }
+
+        return number;
+    }
+
+    private static int getQueryPartitioningID(PartitioningMethods method, Tuple2<Integer, Query> integerQueryTuple2) {
+        int number ;
+        if (method == PartitioningMethods.VERTICAL) {
+            number = integerQueryTuple2._2().getVerticalID();
+        } else if (method == PartitioningMethods.HORIZONTAL) {
+            number = integerQueryTuple2._2().getHorizontalPartition();
+        } else {
+            number = integerQueryTuple2._2().getTimeSlice();
+        }
+
+        return number;
+    }
+
+    public static void nofTrajsOnEachNode(JavaPairRDD<Integer, Trajectory> trajectoryDataset, PartitioningMethods method) {
+
+
+        List<Tuple2<Integer, Integer>> list = trajectoryDataset.mapToPair(new PairFunction<Tuple2<Integer, Trajectory>, Integer, Integer>() {
+            @Override
+            public Tuple2<Integer, Integer> call(Tuple2<Integer, Trajectory> integerQueryTuple2) throws Exception {
+                int number = getPartitioningID(method, integerQueryTuple2);
+                return new Tuple2<>(number % Parallelism.PARALLELISM, 1);
+            }
+
+
+        }).reduceByKey(new Function2<Integer, Integer, Integer>() {
+            @Override
+            public Integer call(Integer v1, Integer v2) throws Exception {
+                return v1 + v2;
+            }
+        }).collect();
+
+        System.out.println("nofTrajectoriesOnEachNode::" + list);
+    }
+
+    public static void nofQueriesInEachTS(JavaPairRDD<Integer, Query> queries) {
+
+        Map<Integer, Integer> map = queries.mapToPair(new PairFunction<Tuple2<Integer, Query>, Integer, Integer>() {
+            @Override
+            public Tuple2<Integer, Integer> call(Tuple2<Integer, Query> integerQueryTuple2) throws Exception {
+
+                return new Tuple2<>(integerQueryTuple2._2().getTimeSlice(), 1);
+            }
+        }).reduceByKey(new Function2<Integer, Integer, Integer>() {
+            @Override
+            public Integer call(Integer v1, Integer v2) throws Exception {
+                return v1 + v2;
+            }
+        }).collectAsMap();
+        TreeMap<Integer, Integer> sortedMap = new TreeMap<>(map);
+        System.out.println("nofQueriesInEachTS::");
+        for (Map.Entry<Integer, Integer> pair : sortedMap.entrySet()) {
+            System.out.println(pair.getKey() + "," + pair.getValue());
+
+        }
+
+    }
+
+    public static void nofTrajsInEachTS(JavaPairRDD<Integer, Trajectory> trajectoryDataset, PartitioningMethods method) {
+
+        List<Tuple2<Integer, Integer>> list = trajectoryDataset.mapToPair(new PairFunction<Tuple2<Integer, Trajectory>, Integer, Integer>() {
+            @Override
+            public Tuple2<Integer, Integer> call(Tuple2<Integer, Trajectory> integerQueryTuple2) throws Exception {
+                return new Tuple2<>(integerQueryTuple2._2().getTimeSlice(), 1);
+            }
+        }).reduceByKey(new Function2<Integer, Integer, Integer>() {
+            @Override
+            public Integer call(Integer v1, Integer v2) throws Exception {
+                return v1 + v2;
+            }
+        }).collect();
+
+        System.out.println("nofTrajsInEachTS::");
+        for (Tuple2<Integer, Integer> pair : list) {
+            System.out.println(pair);
+
+        }
     }
 
 //    public static void nofQueriesInEachVerticalPartition(JavaPairRDD<Integer, Query> queries) {
@@ -139,7 +228,7 @@ public class Stats {
 //            }
 //        }).collect();
 //
-//        System.out.println("nofQueriesInEachTimeSlice::"+list);
+//        System.out.println("nofQueriesOnEachNode::"+list);
 //    }
 
 //    public static void nofTriesInPartitions(JavaPairRDD<Long, Trie> partitionedTries) {

@@ -1,0 +1,8 @@
+        JavaPairRDD<Integer, Set<Integer>> resultSet = partitionedTries.join(partitionedQueries).mapValues(new Function<Tuple2<Trie, Query>, Set<Integer>>() {
+            @Override
+            public Set<Integer> call(Tuple2<Trie, Query> trieQueryTuple2) throws Exception {
+                Set<Integer> result = trieQueryTuple2._1().queryIndex(trieQueryTuple2._2());
+                return result;
+            }
+        });
+

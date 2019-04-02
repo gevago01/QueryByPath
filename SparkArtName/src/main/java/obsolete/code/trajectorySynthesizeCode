@@ -1,0 +1,6 @@
+        JavaPairRDD<Long, Trajectory> trajectoryDataset = records.groupBy(new CSVTrajIDSelector()).mapValues(new CSVRecordToTrajectory());
+        try {
+            TrajectorySynthesizer.synthesize(trajectoryDataset.values().collect(), minTimestamp, maxTimestamp, maxTrajID);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }

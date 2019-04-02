@@ -1,0 +1,25 @@
+        // writing queries to file
+        JavaPairRDD<Integer, Iterable<CSVRecord>> recordSample = recordsCached.sample(false, 0.117344655);
+        List<Tuple2<Integer, Iterable<CSVRecord>>> allRecords = recordSample.collect();
+
+        System.out.println("recordSample.count():" + recordSample.groupByKey().keys().count());
+        try {
+            BufferedWriter bf = new BufferedWriter(new FileWriter(new File("200KqueryRecords.csv")));
+
+            for (Tuple2<Integer, Iterable<CSVRecord>> tuple : allRecords) {
+
+
+                Iterable<CSVRecord> trajectory = tuple._2();
+
+
+                for (CSVRecord csvRec : trajectory) {
+
+                    bf.write(csvRec.getTrajID() + ", " + csvRec.getTimestamp() + ", " + csvRec.getRoadSegment() + "\n");
+
+                }
+            }
+
+            bf.close();
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
