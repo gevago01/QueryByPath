@@ -109,13 +109,12 @@ public class Trajectory  implements Serializable{
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("\ntrajectoryID:"+trajectoryID).append(", startingTime:"+startingTime+", endingTime:"+endingTime+"\n");
 
         for (int i = 0; i < roadSegments.size(); i++) {
-            sb.append( roadSegments.get(i) + "\n");
+            sb.append(trajectoryID).append(", ").append(timestamps.getLong(i)).append(", "). append( roadSegments.getInt(i) + "\n");
         }
 
-        sb.append("----------------------------------------------------------\n");
+        sb.deleteCharAt(sb.length()-1);
         return sb.toString();
     }
 
@@ -154,5 +153,15 @@ public class Trajectory  implements Serializable{
 
     public int getVerticalID() {
         return verticalID;
+    }
+
+    public void setTimestampAt(int j, long randomStartTime) {
+
+        timestamps.set(j,randomStartTime);
+    }
+
+    public void setRoadSegmentAt(int j, int roadSegment) {
+
+        roadSegments.set(j,roadSegment);
     }
 }

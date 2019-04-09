@@ -2,6 +2,7 @@ package partitioning.methods;
 
 import com.google.common.collect.Iterables;
 import comparators.IntegerComparator;
+import comparators.LongComparator;
 import key.selectors.CSVTrajIDSelector;
 import map.functions.CSVRecordToTrajectory;
 import map.functions.HCSVRecToTrajME2;
@@ -14,11 +15,13 @@ import org.apache.spark.api.java.function.*;
 import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.util.DoubleAccumulator;
 import org.apache.spark.util.LongAccumulator;
+import projections.ProjectTimestamps;
 import scala.Tuple2;
 import trie.Query;
 import trie.Trie;
 import utilities.*;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.IntStream;
 
@@ -36,12 +39,13 @@ public class HorizontalPartitioning {
         String appName = HorizontalPartitioning.class.getSimpleName() + nofPartitions;
 //        String fileName = "file:////mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
 //        String queryFile = "file:////mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
+//        String fileName = "file:///home/giannis/IdeaProjects/SparkTrajectories/SparkArtName/timeSkewedDataset.csv";
 //        String fileName = "file:////mnt/hgfs/VM_SHARED/trajDatasets/half.csv";
 
 //        String fileName = "file:////mnt/hgfs/VM_SHARED/trajDatasets/octant.csv";
-//        String fileName = "file:////mnt/hgfs/VM_SHARED/trajDatasets/concatTrajectoryDataset.csv";
+        String fileName = "file:////mnt/hgfs/VM_SHARED/trajDatasets/concatTrajectoryDataset.csv";
 //        String fileName = "file:///mnt/hgfs/VM_SHARED/samplePort.csv";
-//        String queryFile = "file:///mnt/hgfs/VM_SHARED/samplePort.csv";
+        String queryFile = "file:///mnt/hgfs/VM_SHARED/samplePort.csv";
 //        String fileName = "hdfs:////85TD.csv";
 //        String fileName = "hdfs:////half.csv";
 //        String fileName = "hdfs:////onesix.csv";
@@ -52,12 +56,13 @@ public class HorizontalPartitioning {
 //        String queryFile = "hdfs:////queryRecordsOnesix.csv";
 //        String fileName = "hdfs:////synth5GBDataset.csv";
 //        String queryFile = "hdfs:////queryRecords.csv";
-        String fileName = "hdfs:////concatTrajectoryDataset.csv";
-        String queryFile = "hdfs:////200KqueryRecords.csv";
-//        SparkConf conf = new SparkConf().setAppName(appName)
-//                .setMaster("local[*]")
-//                .set("spark.executor.instances", "" + Parallelism.PARALLELISM);
-        SparkConf conf = new SparkConf().setAppName(appName);
+//        String fileName = "hdfs:////concatTrajectoryDataset.csv";
+//        String queryFile = "hdfs:////200KqueryRecords.csv";
+        SparkConf conf = new SparkConf().setAppName(appName)
+                .setMaster("local[*]")
+                .set("spark.executor.instances", "" + Parallelism.PARALLELISM)
+                .set("spark.driver.maxResultSize", "2g");
+//        SparkConf conf = new SparkConf().setAppName(appName);
 
 
         JavaSparkContext sc = new JavaSparkContext(conf);
@@ -68,6 +73,15 @@ public class HorizontalPartitioning {
 
         JavaPairRDD<Integer, Iterable<CSVRecord>> recordsCached = records.groupBy(new CSVTrajIDSelector()).cache();
 
+        TrajectorySynthesizerME ts=new TrajectorySynthesizerME(records);
+
+
+        try {
+            ts.timeSkewedDataset();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.exit(1);
 
         JavaRDD<Integer> trajLengths = recordsCached.mapValues(it -> Iterables.size(it)).values();
 
@@ -90,8 +104,9 @@ public class HorizontalPartitioning {
         return new Tuple2<>(horizontalID, trajectoryTuple2._2());
     }
 });//.filter(new ReduceNofTrajectories());
-
         trajectoryDataset.count();
+
+
 //        trajectoryDataset.groupByKey().keys().foreach(new VoidFunction<Integer>() {
 //            @Override
 //            public void call(Integer integer) throws Exception {

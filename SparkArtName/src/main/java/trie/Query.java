@@ -57,8 +57,13 @@ public class Query implements Serializable {
     public Query(long startingTime, long endingTime, List<Integer> roadSegments) {
         this.startingTime=startingTime;
         this.endingTime=endingTime;
-//        this.pathSegments=roadSegments;
         this.pathSegments=new IntArrayList(roadSegments);
+
+    }
+
+    public Query(Trajectory t) {
+
+        this(t.getStartingTime(),t.getEndingTime(),t.roadSegments);
     }
 
     public int getQueryID() {

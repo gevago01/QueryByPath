@@ -34,6 +34,8 @@ import static java.util.stream.Collectors.toList;
 public class TimeSlicing {
 
 
+
+
     public static void main(String[] args) {
         int numberOfSlices = Integer.parseInt(args[0]);
         ++numberOfSlices;
@@ -41,13 +43,14 @@ public class TimeSlicing {
         String appName = TimeSlicing.class.getSimpleName() + numberOfSlices;
 
 
-//        String fileName = "file:///mnt/hgfs/VM_SHARED/samplePort.csv";
-//        String queryFile = "file:///mnt/hgfs/VM_SHARED/samplePort.csv";
+        String fileName = "file:///mnt/hgfs/VM_SHARED/samplePort.csv";
+        String queryFile = "file:///mnt/hgfs/VM_SHARED/samplePort.csv";
 //        String fileName= "file:///mnt/hgfs/VM_SHARED/trajDatasets/octant.csv";
 //        String fileName= "file:///mnt/hgfs/VM_SHARED/trajDatasets/half.csv";
 //        String fileName= "file:///mnt/hgfs/VM_SHARED/trajDatasets/85TD.csv";
 
 //        String fileName = "file:///mnt/hgfs/VM_SHARED/trajDatasets/concatTrajectoryDataset.csv";
+//        String queryFile = "file:///mnt/hgfs/VM_SHARED/trajDatasets/concatTrajectoryDataset.csv";
 //        String fileName = "file:////data/half.csv";
 //        String fileName= "hdfs:////half.csv";
 //        String fileName= "hdfs:////onesix.csv";
@@ -60,17 +63,17 @@ public class TimeSlicing {
 //        String fileName= "hdfs:////synth5GBDataset.csv";
 //        String queryFile = "hdfs:////queryRecords.csv";
 
-        String fileName = "hdfs:////concatTrajectoryDataset.csv";
-        String queryFile = "hdfs:////200KqueryRecords.csv";
+//        String fileName = "hdfs:////concatTrajectoryDataset.csv";
+//        String queryFile = "hdfs:////200KqueryRecords.csv";
 //        String queryFile = "hdfs:////queryRecordsOnesix.csv";
 
 
 //        String fileName= "file:////home/giannis/octant.csv";
 
-//        SparkConf conf = new SparkConf().setAppName(appName).setMaster("local[*]")
-//                .set("spark.executor.instances", "" + Parallelism.PARALLELISM)
-//                .set("spark.driver.maxResultSize", "3G");
-        SparkConf conf = new SparkConf().setAppName(appName);
+        SparkConf conf = new SparkConf().setAppName(appName).setMaster("local[*]")
+                .set("spark.executor.instances", "" + Parallelism.PARALLELISM)
+                .set("spark.driver.maxResultSize", "3G");
+//        SparkConf conf = new SparkConf().setAppName(appName);
 
         JavaSparkContext sc = new JavaSparkContext(conf);
 //        sc.setCheckpointDir("/home/giannis/IdeaProjects/SparkTrajectories/SparkArtName/target/cpdir");
@@ -82,9 +85,6 @@ public class TimeSlicing {
         JavaRDD<CSVRecord> records = sc.textFile(fileName).map(new LineToCSVRec());
 
         JavaRDD<Long> timestamps = records.map(new ProjectTimestamps());
-        JavaRDD<Integer> trajIDs = records.map(r -> r.getTrajID());
-
-        timestamps.count();
         long minTimestamp = timestamps.min(new LongComparator());
         long maxTimestamp = timestamps.max(new LongComparator());
         //timestamps RDD not needed any more
@@ -157,11 +157,12 @@ public class TimeSlicing {
                 });
 
         Stats.nofTrajsOnEachNode(trajectoryDataset, PartitioningMethods.TIME_SLICING);
-//        Stats.nofTrajsInEachTS(trajectoryDataset);
+//        Stats.nofTrajsInEachSlice(trajectoryDataset, PartitioningMethods.TIME_SLICING);
         //trajectoryDataset RDD not needed any more
         trajectoryDataset.unpersist(true);
 
         trieRDD.count();
+
         System.out.println("Done. Tries build");
 //        Query q = new Query(trajectory.getStartingTime(), trajectory.getEndingTime(), trajectory.roadSegments);
 //        List<Integer> times_slices = q.determineTimeSlice(timePeriods);
@@ -177,7 +178,7 @@ public class TimeSlicing {
 
         System.out.println("TrieNofPartitions:" + trieRDD.rdd().partitions().length);
         Stats.nofQueriesOnEachNode(queries, PartitioningMethods.TIME_SLICING);
-//        Stats.nofQueriesInEachTS(queries);
+//        Stats.nofQueriesInSlice(queries);
 //        Stats.nofTriesInPartitions(trieRDD);
         Broadcast<List<Tuple2<Integer, Query>>> partBroadQueries = sc.broadcast(queries.collect());
         JavaRDD<Set<Integer>> resultSetRDD =

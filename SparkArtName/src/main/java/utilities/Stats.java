@@ -160,23 +160,18 @@ public class Stats {
             }
 
 
-        }).reduceByKey(new Function2<Integer, Integer, Integer>() {
-            @Override
-            public Integer call(Integer v1, Integer v2) throws Exception {
-                return v1 + v2;
-            }
-        }).collect();
+        }).reduceByKey( (v1, v2) -> v1 + v2).collect();
 
         System.out.println("nofTrajectoriesOnEachNode::" + list);
     }
 
-    public static void nofQueriesInEachTS(JavaPairRDD<Integer, Query> queries) {
+    public static void nofQueriesInSlice(JavaPairRDD<Integer, Query> queries, PartitioningMethods method) {
 
         Map<Integer, Integer> map = queries.mapToPair(new PairFunction<Tuple2<Integer, Query>, Integer, Integer>() {
             @Override
             public Tuple2<Integer, Integer> call(Tuple2<Integer, Query> integerQueryTuple2) throws Exception {
-
-                return new Tuple2<>(integerQueryTuple2._2().getTimeSlice(), 1);
+                int number = getQueryPartitioningID(method, integerQueryTuple2);
+                return new Tuple2<>(number, 1);
             }
         }).reduceByKey(new Function2<Integer, Integer, Integer>() {
             @Override
@@ -185,31 +180,27 @@ public class Stats {
             }
         }).collectAsMap();
         TreeMap<Integer, Integer> sortedMap = new TreeMap<>(map);
-        System.out.println("nofQueriesInEachTS::");
+        System.out.println("nofQueriesInSlice::");
         for (Map.Entry<Integer, Integer> pair : sortedMap.entrySet()) {
-            System.out.println(pair.getKey() + "," + pair.getValue());
+            System.out.println( pair.getValue());
 
         }
 
     }
 
-    public static void nofTrajsInEachTS(JavaPairRDD<Integer, Trajectory> trajectoryDataset, PartitioningMethods method) {
+    public static void nofTrajsInEachSlice(JavaPairRDD<Integer, Trajectory> trajectoryDataset, PartitioningMethods method) {
 
-        List<Tuple2<Integer, Integer>> list = trajectoryDataset.mapToPair(new PairFunction<Tuple2<Integer, Trajectory>, Integer, Integer>() {
+        Map<Integer, Integer> map = trajectoryDataset.mapToPair(new PairFunction<Tuple2<Integer, Trajectory>, Integer, Integer>() {
             @Override
             public Tuple2<Integer, Integer> call(Tuple2<Integer, Trajectory> integerQueryTuple2) throws Exception {
-                return new Tuple2<>(integerQueryTuple2._2().getTimeSlice(), 1);
+                int number = getPartitioningID(method, integerQueryTuple2);
+                return new Tuple2<>(number, 1);
             }
-        }).reduceByKey(new Function2<Integer, Integer, Integer>() {
-            @Override
-            public Integer call(Integer v1, Integer v2) throws Exception {
-                return v1 + v2;
-            }
-        }).collect();
-
-        System.out.println("nofTrajsInEachTS::");
-        for (Tuple2<Integer, Integer> pair : list) {
-            System.out.println(pair);
+        }).reduceByKey((Function2<Integer, Integer, Integer>) (v1, v2) -> v1 + v2).collectAsMap();
+        TreeMap<Integer, Integer> sortedMap = new TreeMap<>(map);
+        System.out.println("nofTrajsInEachSlice::"+sortedMap.keySet().stream().max(Integer::compare).get());
+        for (Map.Entry<Integer, Integer> pair : sortedMap.entrySet()) {
+            System.out.println(pair.getValue());
 
         }
     }
