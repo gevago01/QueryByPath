@@ -1,0 +1,28 @@
+//        List<Integer> timeSlices = queries.map(q -> q._2().getTimeSlice()).collect();
+//        HashSet<Integer> timeSlicesSet = new HashSet<>(timeSlices);
+//        Broadcast<Set<Integer>> brTSIDs = sc.broadcast(timeSlicesSet);
+
+//        JavaRDD<Integer> resultSetRDD =trieRDD.mapPartitions(new FlatMapFunction<Iterator<Tuple2<Integer,Trie>>, Integer>() {
+//            @Override
+//            public Iterator<Integer> call(Iterator<Tuple2<Integer, Trie>> trieTuples) throws Exception {
+//                Set<Integer> answer = new TreeSet<>();
+//                List<Tuple2<Integer, Query>> localQueries = partBroadQueries.value();
+//
+//                for (Iterator<Tuple2<Integer, Trie>> it = trieTuples; it.hasNext(); ) {
+//                    Tuple2<Integer, Trie> v1 = it.next();
+//                    for (Tuple2<Integer, Query> queryEntry : localQueries) {
+//                        if (v1._2().getTimeSlice() == queryEntry._2().getTimeSlice()) {
+//
+//                            long t1 = System.nanoTime();
+//                            Set<Integer> ans = v1._2().queryIndex(queryEntry._2());
+//                            long t2 = System.nanoTime();
+//                            long diff = t2 - t1;
+//                            joinTimeAcc.add(diff * Math.pow(10.0, -9.0));
+//                            answer.addAll(ans);
+//                        }
+//                    }
+//
+//                }
+//                return answer.iterator();
+//            }
+//        });

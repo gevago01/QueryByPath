@@ -3,7 +3,6 @@ package utilities;
 import comparators.IntegerComparator;
 import comparators.LongComparator;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
-import key.selectors.CSVTrajIDSelector;
 import map.functions.CSVRecordToTrajectory;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -19,6 +18,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
+import static java.util.stream.Collectors.toList;
+
 /**
  * Created by giannis on 07/03/19.
  */
@@ -31,18 +32,18 @@ public class TrajectorySynthesizer {
     private long maxTrajectoryID;
     private List<Trajectory> trajectories;
 
-    public TrajectorySynthesizer(JavaRDD<CSVRecord> records) {
-        JavaPairRDD<Integer, Iterable<CSVRecord>> recordsCached = records.groupBy(new CSVTrajIDSelector()).cache();
+    public TrajectorySynthesizer(JavaPairRDD<Integer, Iterable<CSVRecord>> recordsCached, Long minTimestamp, Long maxTimestamp, Integer maxTrajectoryID) {
 
         trajectories = recordsCached.mapValues(new CSVRecordToTrajectory()).values().collect();
-        JavaRDD<Long> timestamps = records.map(new ProjectTimestamps());
-        minTimestamp = timestamps.min(new LongComparator());
-        maxTimestamp = timestamps.max(new LongComparator());
-        maxTrajectoryID = records.map(new ProjectRoadSegments()).max(new IntegerComparator());
+
+        this.minTimestamp=minTimestamp;
+        this.maxTimestamp=maxTimestamp;
+
+        this.maxTrajectoryID=maxTrajectoryID;
 
     }
 
-    public  void synthesize( ) throws IOException {
+    public void synthesize() throws IOException {
         BufferedWriter bf = new BufferedWriter(new FileWriter(new File("synthDataset.csv")));
 
         for (Trajectory t : trajectories) {
@@ -66,21 +67,31 @@ public class TrajectorySynthesizer {
         bf.close();
     }
 
-    public  void timeSkewedDataset( ) throws IOException {
+    public void reWrite() throws IOException {
+        BufferedWriter bf = new BufferedWriter(new FileWriter(new File("synthDataset.csv")));
+
+        for (Trajectory t : trajectories) {
+            writeTrajectory(t, bf);
+        }
+
+        bf.close();
+    }
+
+    public void timeSkewedDataset() throws IOException {
 
         int counter = 0;
         BufferedWriter bf = new BufferedWriter(new FileWriter(new File("timeSkewedDataset.csv")));
 
-        long randomTimestamp = ThreadLocalRandom.current().nextLong(minTimestamp, maxTimestamp);
+        final long fixedRandomTimestamp = ThreadLocalRandom.current().nextLong(minTimestamp, maxTimestamp);
 
         for (Trajectory t : trajectories) {
 
             ArrayList<Long> timeDiffs = getTimeDiffs(t.getTimestamps());
 
-            if (counter % 10 == 0) {
+            if (counter % 2 == 0) {
 
                 int j;
-                long randomStartTime = randomTimestamp;
+                long randomStartTime = fixedRandomTimestamp;
                 for (j = 0; j < t.getRoadSegments().size() - 1; j++) {
                     bf.write(t.getTrajectoryID() + ", " + randomStartTime + ", " + t.getRoadSegments().getInt(j) + "\n");
                     randomStartTime = randomStartTime + timeDiffs.get(j);
@@ -95,21 +106,27 @@ public class TrajectorySynthesizer {
         bf.close();
     }
 
-    public  void roadSegmentSkewedDataset( ) throws IOException {
+    public void roadSegmentSkewedDataset() throws IOException {
 
         int counter = 0;
         BufferedWriter bf = new BufferedWriter(new FileWriter(new File("roadSegmentSkewedDataset.csv")));
 
         Random random = new Random();
+        int randomStartingRS= trajectories.get(random.nextInt(trajectories.size() - 1)).getStartingRS();
 
-        Trajectory randomTrajectory = trajectories.get(random.nextInt(trajectories.size()));
+        List<Trajectory> randomTrjs = trajectories.stream().filter(t -> t.getStartingRS()==randomStartingRS).collect(toList());
 
+        System.out.println("randomTrjs.size():"+randomTrjs.size());
         for (Trajectory t : trajectories) {
 
 
-            if (counter % 10 == 0) {
-                for (int j = 0; j < randomTrajectory.getRoadSegments().size(); j++) {
-                    bf.write(t.getTrajectoryID() + ", " + randomTrajectory.getTimestamps().getLong(j) + ", " + randomTrajectory.getRoadSegments().getInt(j) + "\n");
+            if (counter % 2 == 0) {
+                Trajectory randomTrajectory = randomTrjs.get(random.nextInt(randomTrjs.size()-1));
+                ArrayList<Long> timeDiffs = getTimeDiffs(randomTrajectory.getTimestamps());
+                long randomStartTime = ThreadLocalRandom.current().nextLong(minTimestamp, maxTimestamp);
+                for (int j = 0; j < randomTrajectory.getRoadSegments().size()-1; j++) {
+                    bf.write(t.getTrajectoryID() + ", " + randomStartTime + ", " + randomTrajectory.getRoadSegments().getInt(j) + "\n");
+                    randomStartTime = randomStartTime + timeDiffs.get(j);
                 }
             } else {
                 writeTrajectory(t, bf);

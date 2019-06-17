@@ -1,7 +1,6 @@
 package trie;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.longs.LongArrayList;
 import partitioners.StartingRSPartitioner;
 import utilities.PartitioningMethods;
 import utilities.Trajectory;
@@ -16,10 +15,9 @@ public class Query implements Serializable {
     private int queryID;
     private static int counter;
     private long startingTime, endingTime;
-    public int timeSlice;
-    private int horizontalPartition = -1;
+    public int partitionID;
     public IntArrayList pathSegments = new IntArrayList();
-    private int verticalID;
+
 
     public Query(Trajectory t, List<Integer> roadIntervals, PartitioningMethods pm) {
 
@@ -29,12 +27,12 @@ public class Query implements Serializable {
 
         if (pm == PartitioningMethods.VERTICAL) {
             int x = new StartingRSPartitioner(roadIntervals,0).getPartition2(t.roadSegments.get(0));
-            verticalID = x;
+            partitionID = x;
         }
         else if (pm == PartitioningMethods.TIME_SLICING) {
             List<Integer> timeSlices=determineTimeSlice(roadIntervals);
-//            timeSlice=timeSlices.get(new Random().nextInt(timeSlices.size())) % Parallelism.PARALLELISM;
-            timeSlice=timeSlices.get(new Random().nextInt(timeSlices.size())) ;
+//            partitionID=timeSlices.get(new Random().nextInt(timeSlices.size())) % Parallelism.PARALLELISM;
+            partitionID =timeSlices.get(new Random().nextInt(timeSlices.size())) ;
         }
         else if(pm == PartitioningMethods.HORIZONTAL) {
             //do nothing
@@ -50,8 +48,8 @@ public class Query implements Serializable {
 
         this(t.getStartingTime(),t.getEndingTime(),t.roadSegments);
             List<Integer> timeSlices=determineTimeSliceLongs(timestamps);
-//            timeSlice=timeSlices.get(new Random().nextInt(timeSlices.size())) % Parallelism.PARALLELISM;
-            timeSlice=timeSlices.get(new Random().nextInt(timeSlices.size())) ;
+//            partitionID=timeSlices.get(new Random().nextInt(timeSlices.size())) % Parallelism.PARALLELISM;
+            partitionID =timeSlices.stream().findAny().get() ;
     }
 
     public Query(long startingTime, long endingTime, List<Integer> roadSegments) {
@@ -73,13 +71,14 @@ public class Query implements Serializable {
         this.queryID = queryID;
     }
 
-    public int getTimeSlice() {
-        return timeSlice;
+    public int getPartitionID() {
+        return partitionID;
     }
 
-    public int getHorizontalPartition() {
-        return horizontalPartition;
+    public void setPartitionID(int partition) {
+        partitionID=partition;
     }
+
 
     public long getStartingTime() {
         return startingTime;
@@ -167,6 +166,11 @@ public class Query implements Serializable {
 
         }
 
+        if (minIndex==maxIndex){
+            timeSlices.add(minIndex);
+        }
+
+
         //make sure you don't need equal here
         for (int i = minIndex; i < maxIndex; i++) {
             timeSlices.add(i);
@@ -176,14 +180,5 @@ public class Query implements Serializable {
 
     }
 
-    public void setHorizontalPartition(int horizontalPartition) {
-        this.horizontalPartition = horizontalPartition;
-    }
 
-    public void setVerticalID(int verticalID) {
-        this.verticalID = verticalID;
-    }
-    public int getVerticalID() {
-        return verticalID;
-    }
 }

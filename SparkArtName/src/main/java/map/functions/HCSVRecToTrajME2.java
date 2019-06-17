@@ -1,6 +1,7 @@
 package map.functions;
 
 import com.google.common.collect.Lists;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
 import org.apache.spark.api.java.function.Function;
 import utilities.CSVRecord;
 import utilities.Trajectory;
@@ -42,22 +43,20 @@ public class HCSVRecToTrajME2 implements Function<Iterable<CSVRecord>, Iterable<
 
         int subTrajID = 0;
         for (List<CSVRecord> subTrajectory : allSubTrajs) {
+            LongArrayList startingEnding = new LongArrayList();
             Trajectory mo = null;
             CSVRecord previous = null;
             for (CSVRecord csvRec : subTrajectory) {
                 if (mo == null) {
                     mo = new Trajectory(csvRec.getTrajID());
-                    mo.setStartingTime(csvRec.getTimestamp());
-                    mo.setHorizontalID(subTrajID++);
+                    startingEnding.add(csvRec.getTimestamp());
+                    mo.setPartitionID(subTrajID++);
                 }
                 mo.addRoadSegment(csvRec.getRoadSegment());
                 previous = csvRec;
             }
-            try {
-                mo.setEndingTime(previous.getTimestamp());
-            } catch (NullPointerException e) {
-                System.out.println();
-            }
+            startingEnding.add(previous.getTimestamp());
+            mo.setTimestamps(startingEnding);
             trajectoryList.add(mo);
         }
 
@@ -71,7 +70,7 @@ public class HCSVRecToTrajME2 implements Function<Iterable<CSVRecord>, Iterable<
         //first loop might be skipped if trajectory is too short
         indexes.put(0, 1);
         int until;
-        for (until = 0; until < intervals.size()-1; until++) {
+        for (until = 0; until < intervals.size() - 1; until++) {
             if (trajectoryLength >= intervals.get(until) && trajectoryLength <= intervals.get(until + 1)) {
 
                 break;

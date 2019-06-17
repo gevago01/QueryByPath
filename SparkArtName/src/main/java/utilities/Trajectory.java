@@ -1,61 +1,45 @@
 package utilities;
 
 
-import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-public class Trajectory  implements Serializable{
+public class Trajectory implements Serializable {
 
-
-    private int verticalID;
-
-    public int getHorizontalID() {
-        return horizontalID;
-    }
-    private int horizontalID;
-    public int getTrajectoryID() {
-        return trajectoryID;
-    }
     public int trajectoryID;
+    private int partitionID;
+    public IntArrayList roadSegments = new IntArrayList();
+    public LongArrayList timestamps = new LongArrayList();
+
+
 
     public LongArrayList getTimestamps() {
         return timestamps;
     }
 
-    public LongArrayList timestamps = new LongArrayList();
+    public int getTrajectoryID() {
+        return trajectoryID;
+    }
+
     public long getStartingTime() {
-        return startingTime;
+        return timestamps.getLong(0);
     }
+
     public long getEndingTime() {
-        return endingTime;
+        return timestamps.getLong(timestamps.size()-1);
     }
-    private long startingTime;
-    private long endingTime;
 
     public IntArrayList getRoadSegments() {
         return roadSegments;
     }
 
-    public IntArrayList roadSegments = new IntArrayList();
-
-    public Integer getTimeSlice() {
-        return timeSlice;
-    }
-
-    public Integer timeSlice = 0;
 
 
-    public void setTimeSlice(Integer timeSlice) {
-        this.timeSlice = timeSlice;
-    }
-    public int getStartingRS(){
+    public int getStartingRS() {
         return roadSegments.get(0);
     }
 
@@ -65,25 +49,11 @@ public class Trajectory  implements Serializable{
         roadSegments.add(roadSegment);
     }
 
-    public void setStartingTime(Long startingTime) {
-        this.startingTime = startingTime;
-    }
-
-    public void setEndingTime(Long endingTime) {
-        this.endingTime = endingTime;
-    }
-
-    public void setHorizontalID(int horizontalID) {
-        this.horizontalID = horizontalID;
-    }
-
 
     public Trajectory(Trajectory t, int time_slice) {
         trajectoryID = t.trajectoryID;
         roadSegments = t.roadSegments;
-        startingTime = t.startingTime;
-        endingTime = t.endingTime;
-        timeSlice = time_slice;
+        partitionID = time_slice;
 
     }
 
@@ -111,10 +81,10 @@ public class Trajectory  implements Serializable{
         StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < roadSegments.size(); i++) {
-            sb.append(trajectoryID).append(", ").append(timestamps.getLong(i)).append(", "). append( roadSegments.getInt(i) + "\n");
+            sb.append(trajectoryID).append(", ").append(", ").append(roadSegments.getInt(i) + "\n");
         }
 
-        sb.deleteCharAt(sb.length()-1);
+//        sb.deleteCharAt(sb.length() );
         return sb.toString();
     }
 
@@ -125,11 +95,11 @@ public class Trajectory  implements Serializable{
         for (int i = 0; i < timePeriods.size(); i++) {
 
 
-            if (startingTime >= timePeriods.get(i)) {
+            if (getStartingTime() >= timePeriods.get(i)) {
                 minIndex = i;
             }
 
-            if (endingTime <= timePeriods.get(i) && !foundMax) {
+            if (getEndingTime() <= timePeriods.get(i) && !foundMax) {
                 foundMax = true;
                 maxIndex = i;
             }
@@ -147,21 +117,64 @@ public class Trajectory  implements Serializable{
         return timeSlices;
     }
 
-    public void setVerticalID(int verticalID) {
-        this.verticalID = verticalID;
+
+    public void setPartitionID(int partitionID) {
+        this.partitionID = partitionID;
     }
 
-    public int getVerticalID() {
-        return verticalID;
+    public int getPartitionID() {
+        return partitionID;
     }
 
     public void setTimestampAt(int j, long randomStartTime) {
 
-        timestamps.set(j,randomStartTime);
+        timestamps.set(j, randomStartTime);
     }
 
     public void setRoadSegmentAt(int j, int roadSegment) {
 
-        roadSegments.set(j,roadSegment);
+        roadSegments.set(j, roadSegment);
+    }
+
+    public void trimTimestamps(int size) {
+        //leave timestamps unchanged, but trim to size
+        timestamps.trim(size);
+    }
+
+    public void setRoadSegments(IntArrayList roadSegments) {
+        this.roadSegments = roadSegments;
+    }
+
+    public void setTimestamps(LongArrayList timestamps) {
+        this.timestamps = timestamps;
+    }
+
+    public static List<Integer> determineTimeSlice(Trajectory t, List<Long> timePeriods) {
+        List<Integer> timeSlices = new ArrayList<>();
+        boolean foundMax = false;
+        int minIndex = -1, maxIndex = -1;
+        for (int i = 0; i < timePeriods.size(); i++) {
+
+
+            if (t.getStartingTime() >= timePeriods.get(i)) {
+                minIndex = i;
+            }
+
+            if (t.getEndingTime() <= timePeriods.get(i) && !foundMax) {
+                foundMax = true;
+                maxIndex = i;
+            }
+
+        }
+
+        assert (minIndex != maxIndex);
+        assert (minIndex < maxIndex);
+        //make sure you don't need equal here
+        for (int i = minIndex; i < maxIndex; i++) {
+            timeSlices.add(i);
+        }
+
+        assert (!timeSlices.isEmpty());
+        return timeSlices;
     }
 }

@@ -7,6 +7,7 @@ import utilities.CSVRecord;
  * Created by giannis on 11/01/19.
  */
 public class LineToCSVRec implements Function<String, CSVRecord> {
+
     @Override
     public CSVRecord call(String s) throws Exception {
         String[] tokens = s.split(",");

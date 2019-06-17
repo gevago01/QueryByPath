@@ -1,6 +1,7 @@
 package map.functions;
 
 import com.google.common.collect.Lists;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
 import org.apache.spark.api.java.function.Function;
 import utilities.CSVRecord;
 import utilities.Trajectory;
@@ -33,6 +34,7 @@ public class HCSVRecToTrajME implements Function<Iterable<CSVRecord>, Iterable<T
 
         List<Trajectory> trajectoryList = new ArrayList<>();
         ArrayList<CSVRecord> csvRecordList = Lists.newArrayList(csvRecords);
+        LongArrayList startingEnding=new LongArrayList();
 
         if (csvRecordList.size()>max){
             max=csvRecordList.size();
@@ -52,13 +54,13 @@ public class HCSVRecToTrajME implements Function<Iterable<CSVRecord>, Iterable<T
             for (CSVRecord csvRec : subTrajectory) {
                 if (mo == null) {
                     mo = new Trajectory(csvRec.getTrajID());
-                    mo.setStartingTime(csvRec.getTimestamp());
-                    mo.setHorizontalID(subTrajID++);
+                    startingEnding.add(csvRec.getTimestamp());
+                    mo.setPartitionID(subTrajID++);
                 }
                 mo.addRoadSegment(csvRec.getRoadSegment());
                 previous = csvRec;
             }
-            mo.setEndingTime(previous.getTimestamp());
+            startingEnding.add(previous.getTimestamp());
 
             trajectoryList.add(mo);
         }

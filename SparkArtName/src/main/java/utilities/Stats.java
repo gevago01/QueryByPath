@@ -124,29 +124,11 @@ public class Stats {
     }
 
     private static int getPartitioningID(PartitioningMethods method, Tuple2<Integer, Trajectory> integerQueryTuple2) {
-        int number ;
-        if (method == PartitioningMethods.VERTICAL) {
-            number = integerQueryTuple2._2().getVerticalID();
-        } else if (method == PartitioningMethods.HORIZONTAL) {
-            number = integerQueryTuple2._2().getHorizontalID();
-        } else {
-            number = integerQueryTuple2._2().getTimeSlice();
-        }
-
-        return number;
+     return integerQueryTuple2._2().getPartitionID();
     }
 
     private static int getQueryPartitioningID(PartitioningMethods method, Tuple2<Integer, Query> integerQueryTuple2) {
-        int number ;
-        if (method == PartitioningMethods.VERTICAL) {
-            number = integerQueryTuple2._2().getVerticalID();
-        } else if (method == PartitioningMethods.HORIZONTAL) {
-            number = integerQueryTuple2._2().getHorizontalPartition();
-        } else {
-            number = integerQueryTuple2._2().getTimeSlice();
-        }
-
-        return number;
+       return integerQueryTuple2._2().getPartitionID();
     }
 
     public static void nofTrajsOnEachNode(JavaPairRDD<Integer, Trajectory> trajectoryDataset, PartitioningMethods method) {
@@ -210,7 +192,7 @@ public class Stats {
 //        List<Tuple2<Integer, Integer>> list=queries.mapToPair(new PairFunction<Tuple2<Integer, Query>, Integer, Integer>() {
 //            @Override
 //            public Tuple2<Integer, Integer> call(Tuple2<Integer, Query> integerQueryTuple2) throws Exception {
-//                return new Tuple2<>(integerQueryTuple2._2().getVerticalID()%Parallelism.PARALLELISM,1);
+//                return new Tuple2<>(integerQueryTuple2._2().getPartitionID()%Parallelism.PARALLELISM,1);
 //            }
 //        }).reduceByKey(new Function2<Integer, Integer, Integer>() {
 //            @Override

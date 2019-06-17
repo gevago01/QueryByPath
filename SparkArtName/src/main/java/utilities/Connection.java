@@ -13,13 +13,13 @@ public class Connection implements Serializable {
     @Override
     public boolean equals(Object o)
     {
-        return (o instanceof Connection) && getDestination().getWord()==((Connection) o).getDestination().getWord();
+        return (o instanceof Connection) && getDestination().getRoadSegment()==((Connection) o).getDestination().getRoadSegment();
     }
 
 
     @Override
     public int hashCode(){
-        return Integer.hashCode(destination.resolve().getWord());
+        return Integer.hashCode(destination.resolve().getRoadSegment());
     }
     public Node getDestination() {
         return destination.resolve();

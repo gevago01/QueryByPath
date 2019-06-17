@@ -1,6 +1,7 @@
 package map.functions;
 
 import com.google.common.collect.Lists;
+import it.unimi.dsi.fastutil.longs.LongArrayList;
 import org.apache.spark.api.java.function.Function;
 import utilities.CSVRecord;
 import utilities.Trajectory;
@@ -24,17 +25,20 @@ public class CSVRecToTrajME implements Function<Iterable<CSVRecord>, Trajectory>
 
         csvRecordList.sort(Comparator.comparing(CSVRecord::getTimestamp));
         Trajectory mo = null;
+        LongArrayList startingEnding=new LongArrayList();
 
         CSVRecord previous=null;
         for (CSVRecord csvRec:csvRecordList) {
             if (mo == null) {
                 mo = new Trajectory(csvRec.getTrajID());
-                mo.setStartingTime(csvRec.getTimestamp());
+                startingEnding.add(csvRec.getTimestamp());
             }
             mo.addRoadSegment(csvRec.getRoadSegment());
             previous=csvRec;
         }
-        mo.setEndingTime(previous.getTimestamp());
+        startingEnding.add(previous.getTimestamp());
+        mo.setTimestamps(startingEnding);
+
         return mo;
     }
 }

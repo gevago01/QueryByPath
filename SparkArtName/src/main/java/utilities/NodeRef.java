@@ -3,8 +3,6 @@ package utilities;
 import trie.Node;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.TreeMap;
 
 /**
  * Created by giannis on 22/12/18.
@@ -23,8 +21,8 @@ public class NodeRef implements Serializable{
 
     public NodeRef(Node node) {
         this.node = node;
-        this.uid = node.getWord();
-//        Node nodeReference = nodePool.get(node.getWord());
+        this.uid = node.getRoadSegment();
+//        Node nodeReference = nodePool.get(node.getRoadSegment());
 //        if (nodeReference == null) {
 //            nodePool.put(uid, node);
 //        }

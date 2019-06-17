@@ -2,13 +2,28 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="223c1080-b87a-40cd-8a4d-72e524bc1118" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/SparkArtName/src/main/java/utilities/PartitioningMethods.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/SparkArtName/src/main/java/utilities/TrajectorySynthesizer.java" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/SparkArtName/.idea/libraries/Maven__com_google_guava_guava_16_0_1.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/SparkArtName/.idea/libraries/Maven__net_sf_trove4j_trove4j_3_0_2.xml" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/TimeSlicing$3.class" afterPath="" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/SparkArtName/src/main/java/obsolete/code/timeSlicingMethods" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/SparkArtName/src/main/java/utilities/QuerySynthesizer.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/SparkArtName/src/main/java/utilities/TimeTrajIDTuple.java" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/SparkArtName/src/main/java/key/selectors/CSVTrajIDSelector.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/SparkArtName/src/main/java/key/selectors/QueryIDSelector.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/SparkArtName/src/main/java/key/selectors/TrajectoryTSSelector.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/combiners/TrajectoryCombiner.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/key/selectors/CSVTrajIDSelector.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/key/selectors/TrajectoryTSSelector.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/merge/combiners/MergeTries.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/merge/values/MergeTrajectory.class" afterPath="" />
       <change type="DELETED" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/TimeSlicing$4.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/VerticalPartitioning$4.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/VerticalPartitioning$5.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/VerticalPartitioning$6.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/VerticalPartitioning$7.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/utilities/StringPool.class" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/filtering/FilterEmptyAnswers.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/filtering/FilterEmptyAnswers.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/map/functions/CSVRecToTrajME.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/map/functions/CSVRecToTrajME.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/map/functions/HCSVRecToTrajME.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/map/functions/HCSVRecToTrajME.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/map/functions/LineToCSVRec.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/map/functions/LineToCSVRec.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/map/functions/TrajToTSTrajs.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/map/functions/TrajToTSTrajs.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/partitioners/IntegerPartitioner.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/partitioners/IntegerPartitioner.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/partitioners/LongPartitioner.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/partitioners/LongPartitioner.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/HorizontalPartitioning$1.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/HorizontalPartitioning$1.class" />
@@ -20,32 +35,38 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/HorizontalPartitioning.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/HorizontalPartitioning.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/TimeSlicing$1.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/TimeSlicing$1.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/TimeSlicing$2.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/TimeSlicing$2.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/TimeSlicing$3.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/TimeSlicing$3.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/TimeSlicing.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/TimeSlicing.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/VerticalPartitioning$1.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/VerticalPartitioning$1.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/VerticalPartitioning$2.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/VerticalPartitioning$2.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/VerticalPartitioning$3.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/VerticalPartitioning$3.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/VerticalPartitioning$4.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/VerticalPartitioning$4.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/VerticalPartitioning$5.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/VerticalPartitioning$5.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/VerticalPartitioning$6.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/VerticalPartitioning$6.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/VerticalPartitioning$7.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/VerticalPartitioning$7.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/VerticalPartitioning.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/partitioning/methods/VerticalPartitioning.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/trie/Node.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/trie/Node.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/trie/Query.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/trie/Query.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/trie/Trie.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/trie/Trie.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/utilities/CSVRecord.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/utilities/CSVRecord.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/utilities/Connection.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/utilities/Connection.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/utilities/Parallelism.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/utilities/Parallelism.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/utilities/NodeRef.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/utilities/NodeRef.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/classes/utilities/Trajectory.class" afterPath="$PROJECT_DIR$/SparkArtName/target/classes/utilities/Trajectory.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterPath="$PROJECT_DIR$/SparkArtName/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/.idea/workspace.xml" afterPath="$PROJECT_DIR$/SparkArtName/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/SparkArtifact.iml" afterPath="$PROJECT_DIR$/SparkArtName/SparkArtifact.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/pom.xml" afterPath="$PROJECT_DIR$/SparkArtName/pom.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/src/main/java/map/functions/CSVRecToTrajME.java" afterPath="$PROJECT_DIR$/SparkArtName/src/main/java/map/functions/CSVRecToTrajME.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/src/main/java/map/functions/HCSVRecToTrajME.java" afterPath="$PROJECT_DIR$/SparkArtName/src/main/java/map/functions/HCSVRecToTrajME.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/src/main/java/partitioners/StartingRSPartitioner.java" afterPath="$PROJECT_DIR$/SparkArtName/src/main/java/partitioners/StartingRSPartitioner.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/src/main/java/map/functions/HCSVRecToTrajME2.java" afterPath="$PROJECT_DIR$/SparkArtName/src/main/java/map/functions/HCSVRecToTrajME2.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/src/main/java/map/functions/LineToCSVRec.java" afterPath="$PROJECT_DIR$/SparkArtName/src/main/java/map/functions/LineToCSVRec.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/src/main/java/map/functions/TrajToTSTrajs.java" afterPath="$PROJECT_DIR$/SparkArtName/src/main/java/map/functions/TrajToTSTrajs.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/src/main/java/partitioning/methods/HorizontalPartitioning.java" afterPath="$PROJECT_DIR$/SparkArtName/src/main/java/partitioning/methods/HorizontalPartitioning.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/src/main/java/partitioning/methods/TimeSlicing.java" afterPath="$PROJECT_DIR$/SparkArtName/src/main/java/partitioning/methods/TimeSlicing.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/src/main/java/partitioning/methods/VerticalPartitioning.java" afterPath="$PROJECT_DIR$/SparkArtName/src/main/java/partitioning/methods/VerticalPartitioning.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/src/main/java/trie/Node.java" afterPath="$PROJECT_DIR$/SparkArtName/src/main/java/trie/Node.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/src/main/java/trie/Query.java" afterPath="$PROJECT_DIR$/SparkArtName/src/main/java/trie/Query.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/src/main/java/utilities/CSVRecord.java" afterPath="$PROJECT_DIR$/SparkArtName/src/main/java/utilities/CSVRecord.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/src/main/java/utilities/Intervals.java" afterPath="$PROJECT_DIR$/SparkArtName/src/main/java/utilities/Intervals.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/src/main/java/utilities/Parallelism.java" afterPath="$PROJECT_DIR$/SparkArtName/src/main/java/utilities/Parallelism.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/src/main/java/utilities/Trajectory.java" afterPath="$PROJECT_DIR$/SparkArtName/src/main/java/utilities/Trajectory.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterPath="$PROJECT_DIR$/SparkArtName/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/src/main/java/utilities/TrajectorySynthesizer.java" afterPath="$PROJECT_DIR$/SparkArtName/src/main/java/utilities/TrajectorySynthesizer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/src/main/java/utilities/TrajectorySynthesizerME.java" afterPath="$PROJECT_DIR$/SparkArtName/src/main/java/utilities/TrajectorySynthesizerME.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/maven-archiver/pom.properties" afterPath="$PROJECT_DIR$/SparkArtName/target/maven-archiver/pom.properties" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SparkArtName/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterPath="$PROJECT_DIR$/SparkArtName/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -57,12 +78,12 @@
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
-    <leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file leaf-file-name="HorizontalPartitioning.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/SparkArtName/src/main/java/partitioning/methods/HorizontalPartitioning.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="375">
-              <caret line="112" column="0" lean-forward="true" selection-start-line="112" selection-start-column="0" selection-end-line="112" selection-end-column="0" />
+            <state relative-caret-position="285">
+              <caret line="106" column="80" lean-forward="true" selection-start-line="106" selection-start-column="80" selection-end-line="106" selection-end-column="80" />
               <folding />
             </state>
           </provider>
@@ -111,10 +132,19 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scratches" />
       <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="SparkTrajectories" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="SparkTrajectories" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
           <PATH>
             <PATH_ELEMENT>
               <option name="myItemId" value="SparkTrajectories" />
@@ -229,18 +259,9 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="SparkTrajectories" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="SparkTrajectories" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
         </subPane>
       </pane>
+      <pane id="Scratches" />
       <pane id="Scope" />
     </panes>
   </component>
@@ -248,7 +269,7 @@
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.0" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/SparkArtName" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
   </component>
@@ -729,14 +750,16 @@
       <workItem from="1550244730778" duration="150000" />
       <workItem from="1550747442615" duration="120000" />
       <workItem from="1552236241661" duration="608000" />
+      <workItem from="1556727307104" duration="19000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1014000" />
+    <option name="totallyTimeSpent" value="1033000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-1" y="0" width="1922" height="1055" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -753,7 +776,7 @@
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Run with VisualVM" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25773746" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.26040554" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -788,8 +811,16 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/SparkArtName/src/main/java/partitioning/methods/HorizontalPartitioning.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="375">
-          <caret line="112" column="0" lean-forward="true" selection-start-line="112" selection-start-column="0" selection-end-line="112" selection-end-column="0" />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/SparkArtName/src/main/java/partitioning/methods/HorizontalPartitioning.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="285">
+          <caret line="106" column="80" lean-forward="true" selection-start-line="106" selection-start-column="80" selection-end-line="106" selection-end-column="80" />
           <folding />
         </state>
       </provider>

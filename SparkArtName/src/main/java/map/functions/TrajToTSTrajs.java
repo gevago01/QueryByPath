@@ -27,7 +27,8 @@ public class TrajToTSTrajs implements Function<Trajectory, Iterable<Trajectory>>
         //the trajectory as many times as the number of time slices
         for (Integer ts:timeSlices){
             Trajectory traj=new Trajectory(trajectory,ts);
-            traj.setTimeSlice(ts);
+            traj.setTimestamps(trajectory.getTimestamps());
+            traj.setPartitionID(ts);
             list.add(traj);
         }
 

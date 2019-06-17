@@ -4,14 +4,15 @@ package trie;
 import utilities.Trajectory;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class Trie implements Serializable {
     private Node root = Node.getNode(Integer.MAX_VALUE);
-    private int startingRoadSegment = Integer.MAX_VALUE;
-    public int timeSlice;
+    public int partitionID;
     private int horizontalTrieID;
-    private int verticalID;
 
     public int getTrajectoryCounter() {
         return trajectoryCounter;
@@ -20,18 +21,8 @@ public class Trie implements Serializable {
     private int trajectoryCounter = 0;
 
 
-
-
-    public void setStartingRoadSegment(int startingRoadSegment) {
-        this.startingRoadSegment = startingRoadSegment;
-    }
-
-    public Integer getTimeSlice() {
-        return timeSlice;
-    }
-
-    public void setTimeSlice(Integer timeSlice) {
-        this.timeSlice = timeSlice;
+    public void setPartitionID(Integer partition) {
+        this.partitionID = partition;
     }
 
     public int getHorizontalTrieID() {
@@ -48,15 +39,9 @@ public class Trie implements Serializable {
         Node currentNode, child = root;
         int previousRoadSegment = -1;
 
-
-        if (startingRoadSegment == Integer.MAX_VALUE) {
-            //this is only used for vertical partitioning
-            startingRoadSegment = roadSegments.get(0);//.intern();
-        }
-
         getRoot().addTrajectory(startingTime, trajectoryID);
         for (int i = 0; i < roadSegments.size(); i++) {
-            int roadSegment = roadSegments.get(i);//.intern();
+            int roadSegment = roadSegments.get(i);
             if (roadSegment == previousRoadSegment) {
                 continue;
             }
@@ -121,21 +106,6 @@ public class Trie implements Serializable {
 //    }
 
 
-
-    /**
-     * This is only valid for vertical partitioning
-     *
-     * @return
-     */
-    public int getStartingRS() {
-        if (startingRoadSegment == Integer.MAX_VALUE) {
-            System.err.println("Wrong Usage. Insert trajectories to the trie first.");
-            System.exit(-2);
-        }
-        return startingRoadSegment;
-    }
-
-
     /**
      * This method does not answer strict path queries
      * If query is ABCD, it returns trajectories that have only passed through AB for example
@@ -153,19 +123,17 @@ public class Trie implements Serializable {
             int roadSegment = q.getPathSegments().get(i);
 
 
-            if (currentNode.getWord()==(roadSegment)) {
+            if (currentNode.getRoadSegment() == roadSegment) {
+                //stay on this node, query roadSegment is repeated
                 continue;
             }
             Node child = currentNode.getChildren(roadSegment);
 
             if (child == null) {
                 //no matching result
-//                System.err.println("no matching result");
-//                System.exit(1);
                 break;
-            }
-            else{
-                //here filter time
+            } else {
+                //filter time here
                 answer.addAll(child.getTrajectories(q.getStartingTime(), (q.getEndingTime() + 1)));
                 currentNode = child;
             }
@@ -174,6 +142,69 @@ public class Trie implements Serializable {
         return answer;
     }
 
+    public double avgIndexDepth() {
+
+        Node currentNode = root;
+
+        LinkedList<Node> queue = new LinkedList<>();
+        queue.push(currentNode);
+
+        int depth = 0;
+        int counter = 0;
+        int sum = 0;
+
+        while (!queue.isEmpty()) {
+
+            currentNode = queue.pop();
+            List<Node> allChildren = currentNode.getAllChildren();
+
+            if (allChildren.isEmpty()) {
+                sum += depth;
+                ++counter;
+                depth = 0;
+            }
+            ++depth;
+
+            queue.addAll(allChildren);
+
+        }
+
+        double avgBranchDepth = (double) sum / counter;
+
+        return avgBranchDepth;
+
+//        System.exit(1);
+    }
+
+
+    public double avgIndexWidth() {
+
+        Node currentNode = root;
+
+        LinkedList<Node> queue = new LinkedList<>();
+        queue.add(currentNode);
+
+        int counter = 0;
+        int sum = 0;
+
+        while (!queue.isEmpty()) {
+
+            currentNode = queue.remove();
+            List<Node> allChildren = currentNode.getAllChildren();
+
+            sum += currentNode.getAllChildren2().size();
+            ++counter;
+
+            queue.addAll(allChildren);
+
+        }
+
+        double avgBranchWidth = (double) sum / counter;
+
+        return avgBranchWidth;
+
+//        System.exit(1);
+    }
 
 
     public void setHorizontalTrieID(int horizontalTrieID) {
@@ -183,14 +214,10 @@ public class Trie implements Serializable {
     @Override
     public String toString() {
         return "TriePrint{" +
-                "root=" + root.getWord() +
-                ", startingRoadSegment='" + startingRoadSegment + '\'' +
-                ", timeSlice=" + timeSlice +
+                "root=" + root.getRoadSegment() +
                 ", horizontalTrieID=" + horizontalTrieID +
                 '}';
     }
-
-
 
 
     public void insertTrajectory2(Trajectory traj) {
@@ -198,11 +225,5 @@ public class Trie implements Serializable {
         insertTrajectory2(traj.roadSegments, traj.trajectoryID, traj.getStartingTime(), traj.getEndingTime());
     }
 
-    public void setVerticalID(int verticalID) {
-        this.verticalID = verticalID;
-    }
 
-    public int getVerticalID() {
-        return verticalID;
-    }
 }

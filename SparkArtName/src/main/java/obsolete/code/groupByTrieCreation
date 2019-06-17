@@ -49,10 +49,10 @@
 //        JavaRDD<Integer> partitionsRDD=sc.parallelize(partitions);
 //        JavaPairRDD<Integer, Trie> emptyTrieRDD = partitionsRDD.mapToPair(new PairFunction<Integer, Integer, Trie>() {
 //            @Override
-//            public Tuple2<Integer, Trie> call(Integer verticalID) throws Exception {
+//            public Tuple2<Integer, Trie> call(Integer partitionID) throws Exception {
 //                Trie t=new Trie();
-//                t.setVerticalID(verticalID);
-//                return new Tuple2<>(verticalID, t);
+//                t.setVerticalID(partitionID);
+//                return new Tuple2<>(partitionID, t);
 //            }
 //        });
 //        JavaPairRDD<Integer, Trie> trieRDD=

@@ -1,29 +1,23 @@
 package partitioning.methods;
 
-import comparators.IntegerComparator;
-import comparators.LongComparator;
-import key.selectors.CSVTrajIDSelector;
 import map.functions.CSVRecToTrajME;
 import map.functions.LineToCSVRec;
-import map.functions.TrajToTSTrajs;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFunction;
+import org.apache.spark.api.java.function.VoidFunction;
 import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.util.DoubleAccumulator;
 import org.apache.spark.util.LongAccumulator;
-import projections.ProjectTimestamps;
 import scala.Tuple2;
 import trie.Query;
 import trie.Trie;
 import utilities.*;
 
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
@@ -34,95 +28,93 @@ import static java.util.stream.Collectors.toList;
 public class TimeSlicing {
 
 
-
-
     public static void main(String[] args) {
         int numberOfSlices = Integer.parseInt(args[0]);
-        ++numberOfSlices;
 
         String appName = TimeSlicing.class.getSimpleName() + numberOfSlices;
 
 
-        String fileName = "file:///mnt/hgfs/VM_SHARED/samplePort.csv";
-        String queryFile = "file:///mnt/hgfs/VM_SHARED/samplePort.csv";
-//        String fileName= "file:///mnt/hgfs/VM_SHARED/trajDatasets/octant.csv";
-//        String fileName= "file:///mnt/hgfs/VM_SHARED/trajDatasets/half.csv";
-//        String fileName= "file:///mnt/hgfs/VM_SHARED/trajDatasets/85TD.csv";
+//        String fileName = "hdfs:////rssd.csv";
+//        String queryFile = "hdfs:////rssq.csv";
+
+//        String fileName = "hdfs:////timeSkewedDataset.csv";
+//        String queryFile = "hdfs:////timeSkewedQueries";
+//        String fileName = "hdfs:////roadSegmentSkewedDataset.csv";
+//        String queryFile = "hdfs:////roadSegmentSkewedQueries";
+
+//        String fileName = "file:////home/giannis/IdeaProjects/SparkTrajectories/SparkArtName/timeSkewedDataset.csv";
+//        String queryFile = "file:////home/giannis/IdeaProjects/SparkTrajectories/SparkArtName/timeSkewedDataset.csv";
+//        String queryFile = "file:////timeSkewedDataset";
+//        String fileName = "file:///mnt/hgfs/VM_SHARED/samplePort.csv";
+//        String queryFile = "file:///mnt/hgfs/VM_SHARED/samplePort.csv";
 
 //        String fileName = "file:///mnt/hgfs/VM_SHARED/trajDatasets/concatTrajectoryDataset.csv";
 //        String queryFile = "file:///mnt/hgfs/VM_SHARED/trajDatasets/concatTrajectoryDataset.csv";
-//        String fileName = "file:////data/half.csv";
-//        String fileName= "hdfs:////half.csv";
-//        String fileName= "hdfs:////onesix.csv";
-//        String fileName= "hdfs:////octant.csv";
-//        String fileName = "file:///mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
-//        String queryFile = "file:///mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
+        String fileName = "file:///mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
+        String queryFile = "file:///mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
 //        String queryFile = "file:///mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
 //        String queryFile = "file:///mnt/hgfs/VM_SHARED/trajDatasets/queryRecords.csv";
-//        String fileName= "hdfs:////synth8GBDataset.csv";
-//        String fileName= "hdfs:////synth5GBDataset.csv";
-//        String queryFile = "hdfs:////queryRecords.csv";
 
 //        String fileName = "hdfs:////concatTrajectoryDataset.csv";
-//        String queryFile = "hdfs:////200KqueryRecords.csv";
+//        String queryFile = "hdfs:////concatTrajectoryQueries";
 //        String queryFile = "hdfs:////queryRecordsOnesix.csv";
 
 
-//        String fileName= "file:////home/giannis/octant.csv";
 
         SparkConf conf = new SparkConf().setAppName(appName).setMaster("local[*]")
                 .set("spark.executor.instances", "" + Parallelism.PARALLELISM)
                 .set("spark.driver.maxResultSize", "3G");
-//        SparkConf conf = new SparkConf().setAppName(appName);
+//        SparkConf conf = new SparkConf().
+//                setAppName(appName);
+
 
         JavaSparkContext sc = new JavaSparkContext(conf);
 //        sc.setCheckpointDir("/home/giannis/IdeaProjects/SparkTrajectories/SparkArtName/target/cpdir");
         LongAccumulator nofQueries = sc.sc().longAccumulator("NofQueries");
         DoubleAccumulator joinTimeAcc = sc.sc().doubleAccumulator("joinTimeAcc");
+        DoubleAccumulator avgIndexDepth = sc.sc().doubleAccumulator("avgIndexDepth");
+        DoubleAccumulator avgIndexWidth = sc.sc().doubleAccumulator("avgIndexWidth");
 
 
-//        CustomListener mylistener=new CustomListener();
         JavaRDD<CSVRecord> records = sc.textFile(fileName).map(new LineToCSVRec());
 
-        JavaRDD<Long> timestamps = records.map(new ProjectTimestamps());
-        long minTimestamp = timestamps.min(new LongComparator());
-        long maxTimestamp = timestamps.max(new LongComparator());
-        //timestamps RDD not needed any more
-        timestamps.unpersist(true);
-
-        List<Long> timePeriods = Intervals.getIntervals(numberOfSlices, minTimestamp, maxTimestamp);
 
 
-        JavaPairRDD<Integer, Trajectory> trajectoryDataset = records.groupBy(new CSVTrajIDSelector()).mapValues(new CSVRecToTrajME()).flatMapValues(new TrajToTSTrajs(timePeriods)).mapToPair(pair -> new Tuple2<>(pair._2().getTimeSlice(), pair._2()));//filter(new ReduceNofTrajectories());
+        JavaPairRDD<Integer, Trajectory> trajectoryDataset = records.groupBy(csv -> csv.getTrajID()).mapValues(new CSVRecToTrajME()).mapToPair(pair -> new Tuple2<>(pair._2().getPartitionID(), pair._2()));//filter(new ReduceNofTrajectories());
 
-        trajectoryDataset.count();
+
+        HashMap<Integer, Integer> buckets = Intervals.sliceTSToBuckets2(trajectoryDataset, numberOfSlices);
+
+//        buckets.
+        trajectoryDataset = trajectoryDataset.mapToPair(trajectory -> {
+            Integer bucket = buckets.get(trajectory._2().getTrajectoryID());
+
+            trajectory._2().setPartitionID(bucket);
+            return new Tuple2<>(trajectory._2().getPartitionID(), trajectory._2());
+        });
+
+        Stats.nofTrajsOnEachNode(trajectoryDataset, PartitioningMethods.TIME_SLICING);
+//        Stats.nofTrajsInEachSlice(trajectoryDataset, PartitioningMethods.TIME_SLICING);
 
         //records RDD not needed any more
         records.unpersist(true);
 //        GroupSizes.mesaureGroupSize(trajectoryDataset, TimeSlicing.class.getName());
 
 
-        assert (trajectoryDataset.keys().distinct().count() == numberOfSlices);
-
-        List<Integer> partitions = IntStream.range(0, numberOfSlices).boxed().collect(toList());
+        int nofBuckets = Math.toIntExact(buckets.values().stream().distinct().count());
+        System.out.println("nofBuckets:" + nofBuckets);
+        List<Integer> partitions = IntStream.range(0, nofBuckets).boxed().collect(toList());
         JavaRDD<Integer> partitionsRDD = sc.parallelize(partitions);
         JavaPairRDD<Integer, Trie> emptyTrieRDD = partitionsRDD.mapToPair(new PairFunction<Integer, Integer, Trie>() {
             @Override
-            public Tuple2<Integer, Trie> call(Integer timeSlice) throws Exception {
+            public Tuple2<Integer, Trie> call(Integer partitionID) throws Exception {
                 Trie t = new Trie();
-                t.setTimeSlice(timeSlice);
-                return new Tuple2<>(timeSlice, t);
+                t.setPartitionID(partitionID);
+                return new Tuple2<>(partitionID, t);
             }
         });
 
         assert (partitions.size() == numberOfSlices && partitionsRDD.count() == numberOfSlices);
-
-
-        JavaRDD<Integer> setDifference = emptyTrieRDD.keys().subtract(trajectoryDataset.keys().distinct());
-
-        int maxTimeSlice = trajectoryDataset.keys().max(new IntegerComparator());
-
-        System.out.println("maxTimeSlice:" + maxTimeSlice);
 
 
 //        emptyTrieRDD.foreach(new VoidFunction<Tuple2<Integer, Trie>>() {
@@ -156,109 +148,80 @@ public class TimeSlicing {
                     }
                 });
 
-        Stats.nofTrajsOnEachNode(trajectoryDataset, PartitioningMethods.TIME_SLICING);
-//        Stats.nofTrajsInEachSlice(trajectoryDataset, PartitioningMethods.TIME_SLICING);
+
         //trajectoryDataset RDD not needed any more
         trajectoryDataset.unpersist(true);
 
-        trieRDD.count();
+        long noftries=trieRDD.count();
+        System.out.println("noftries:"+noftries);
+
+        trieRDD.foreach(new VoidFunction<Tuple2<Integer, Trie>>() {
+            @Override
+            public void call(Tuple2<Integer, Trie> integerTrieTuple2) throws Exception {
+                System.out.println("trajCounter:"+integerTrieTuple2._2.getTrajectoryCounter());
+            }
+        });
 
         System.out.println("Done. Tries build");
 //        Query q = new Query(trajectory.getStartingTime(), trajectory.getEndingTime(), trajectory.roadSegments);
 //        List<Integer> times_slices = q.determineTimeSlice(timePeriods);
-//        q.timeSlice = times_slices.get(new Random().nextInt(times_slices.size()));
+//        q.partitionID = times_slices.get(new Random().nextInt(times_slices.size()));
 
 
         JavaPairRDD<Integer, CSVRecord> queryRecords = sc.textFile(queryFile).map(new LineToCSVRec()).mapToPair(csvRec -> new Tuple2<>(csvRec.getTrajID(), csvRec));
         JavaPairRDD<Integer, Query> queries =
-                queryRecords.groupByKey().mapValues(new CSVRecToTrajME()).map(t -> new Query(t._2(), timePeriods)).mapToPair(q -> new Tuple2<>(q.getTimeSlice(), q));
+                queryRecords.groupByKey().mapValues(new CSVRecToTrajME()).map(t -> new Query(t._2())).mapToPair(q -> {
+
+//                    q.setPartitionID(buckets.getOrDefault(q.getQueryID(),1));
+                    return new Tuple2<>(q.getPartitionID(), q);
+                });
 //        Broadcast<Map<Integer, Query>> broadcastedQueries = sc.broadcast(queries.collectAsMap());
         System.out.println("nofQueries:" + queries.count());
+//        Stats.nofQueriesInSlice(queries, PartitioningMethods.TIME_SLICING);
         System.out.println("appName:" + appName);
 
         System.out.println("TrieNofPartitions:" + trieRDD.rdd().partitions().length);
-        Stats.nofQueriesOnEachNode(queries, PartitioningMethods.TIME_SLICING);
+
+        System.out.println("TrieNofPartitions:" + trieRDD.rdd().partitions().length);
+//        Stats.nofQueriesOnEachNode(queries, PartitioningMethods.TIME_SLICING);
 //        Stats.nofQueriesInSlice(queries);
 //        Stats.nofTriesInPartitions(trieRDD);
         Broadcast<List<Tuple2<Integer, Query>>> partBroadQueries = sc.broadcast(queries.collect());
+
+
         JavaRDD<Set<Integer>> resultSetRDD =
-                trieRDD.map(new Function<Tuple2<Integer, Trie>, Set<Integer>>() {
+              trieRDD.map(new Function<Tuple2<Integer, Trie>, Set<Integer>>() {
                     @Override
                     public Set<Integer> call(Tuple2<Integer, Trie> v1) throws Exception {
                         Set<Integer> answer = new TreeSet<>();
 
                         List<Tuple2<Integer, Query>> localQueries = partBroadQueries.value();
 
-
+                        avgIndexDepth.add(v1._2().avgIndexDepth());
+                        avgIndexWidth.add(v1._2().avgIndexWidth());
                         for (Tuple2<Integer, Query> queryEntry : localQueries) {
-                            if (v1._2().getTimeSlice() == queryEntry._2().getTimeSlice()) {
 
                                 long t1 = System.nanoTime();
                                 Set<Integer> ans = v1._2().queryIndex(queryEntry._2());
                                 long t2 = System.nanoTime();
+                                if (!ans.isEmpty()){
+//                                    System.out.println("iid:"+v1._1()+","+ans.size());
+                                }
                                 long diff = t2 - t1;
                                 joinTimeAcc.add(diff * Math.pow(10.0, -9.0));
                                 answer.addAll(ans);
-                            }
                         }
                         return answer;
                     }
-                }).filter(set -> set == null ? false : true);
+                }).filter(set -> set.isEmpty() ? false : true);
+        List<Integer> collectedResult = resultSetRDD.collect().stream().flatMap(set -> set.stream()).distinct().collect(toList());
 
-
-        List<Set<Integer>> resultSet = resultSetRDD.collect();
-        int i = 0;
-        for (Set<Integer> trajID : resultSet) {
-            System.out.println(trajID);
-            i += trajID.size();
+        for (Integer t : collectedResult) {
+            System.out.println(t);
         }
-        System.out.println("Size of resultSet:" + i);
-
-//        -- using a broadcast variable
-//
-//        partitionedTries.groupWith(partitionedQueries).foreach(new VoidFunction<Tuple2<Integer, Tuple2<Iterable<Trie>, Iterable<Query>>>>() {
-//            @Override
-//            public void call(Tuple2<Integer, Tuple2<Iterable<Trie>, Iterable<Query>>> trieQueryTuple) throws Exception {
-//                List<Query> queryList=Lists.newArrayList(trieQueryTuple._2()._2());
-//
-//                Set<Long> answer = new TreeSet<>();
-//
-//
-//                for(Trie trie:trieQueryTuple._2()._1()) {
-//                    for (int i = 0; i < queryList.size(); i++) {
-//                        answer.addAll(trie.queryIndex(queryList.get(i)));
-//                    }
-//
-//
-//                }
-//
-//                System.out.println("answer.size():"+answer.size());
-//
-//            }
-//        });
-
-//        List<Set<Long>> resultSet=trieDataset.mapValues(new Function<Tuple2<Integer, Trie>, Set<Long>>() {
-//            @Override
-//            public Set<Long> call(Tuple2<Integer, Trie> v1) throws Exception {
-//                Map<Integer, Query> localQueries = broadcastedQueries.value();
-//
-//                Set<Long> answer=new TreeSet<>();
-//                for (Map.Entry<Integer, Query> queryEntry : localQueries.entrySet()) {
-//
-//                    if (queryEntry.getValue().getTimeSlice()==v1._2().getTimeSlice()){
-//                        answer.addAll(v1._2().queryIndex(queryEntry.getValue()));
-//                    }
-//                    else{
-//                        System.out.println("NOTFOUND");
-//                    }
-//                }
-//                return answer;
-//            }
-//        }).filter( set -> set.isEmpty()?false:true).collect();
-//        for (Set<Long> set:resultSet) {
-//            System.out.println(set);
-//        }
-//        System.out.println("Size of resultSet:"+resultSet.size());
+        System.out.println("resultSetSize:" + collectedResult.size());
+        System.out.println("avgTrieDepth:"+avgIndexDepth.value() / noftries);
+        System.out.println("avgIndexWidth:"+avgIndexWidth.value() / noftries);
 
 
     }
