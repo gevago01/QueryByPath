@@ -1,7 +1,6 @@
 package utilities;
 
 import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.Function;
 import scala.Tuple2;
 
@@ -79,13 +78,6 @@ public class Intervals {
 
         for (Tuple2<Long, Iterable<Tuple2<Integer, Trajectory>>> trajsAtThisTimestamp : groupedTrajs) {
 
-//            if (trajsAtThisTimestamp._1()<currentT){
-//                currentT=trajsAtThisTimestamp._1();
-//            }
-//            else{
-//                System.err.println("wrong order");
-//                System.exit(1);
-//            }
             for (Tuple2<Integer, Trajectory> trajectory : trajsAtThisTimestamp._2()) {
 
                 partitioning.put(trajectory._2().getTrajectoryID(), bucketNumber);
@@ -321,21 +313,44 @@ public class Intervals {
 
     public static HashMap<Integer, Integer> hybridSlicing(JavaPairRDD<Integer, Trajectory> trajectoryDataset, final int bucketCapacity) {
 
-        JavaRDD<Trajectory> k=trajectoryDataset.values().sortBy(new Function<Trajectory, Integer>() {
-            @Override
-            public Integer call(Trajectory v1) throws Exception {
-                return v1.getStartingRS();
-            }
-        },true,1);
 
-        List<Trajectory> kds=k.collect();
-//        List<Trajectory> so=sortedTrajs.collect(toList());
-        System.out.println("trajectories sorted");
+        List<Tuple2<Integer, Iterable<Tuple2<Integer, Trajectory>>>> groupedTrajs = trajectoryDataset.
+                groupBy(new Function<Tuple2<Integer, Trajectory>, Integer>() {
+                    @Override
+                    public Integer call(Tuple2<Integer, Trajectory> v1) throws Exception {
+                        return v1._2().getPartitionID();
+                    }
+                }).collect();
 
-//        HashMap<Integer,Integer> partitioning = assignTrajsToBuckets(sortedTrajs.iterator(),bucketCapacity);
-        HashMap<Integer,Integer> partitioning = null;
+
+//        HashMap<Integer,Integer> partitioning = assignTrajsToBuckets(groupedTrajs.iterator(),bucketCapacity);
+        HashMap<Integer,Integer> partitioning = assignTrajsToBucketsHybrid(groupedTrajs,bucketCapacity);
 
         return partitioning;
+    }
+
+    private static HashMap<Integer,Integer> assignTrajsToBucketsHybrid(List<Tuple2<Integer, Iterable<Tuple2<Integer, Trajectory>>>> groupedTrajs, int bucketCapacity) {
+        HashMap<Integer, Integer> partitioning = new HashMap<>();
+        int sum = 0;
+        int bucketNumber = 0;
+
+        for (Tuple2<Integer, Iterable<Tuple2<Integer, Trajectory>>> group :groupedTrajs) {
+
+            for (Tuple2<Integer, Trajectory> trajectory: group._2()) {
+
+                    partitioning.put(trajectory._2().getTrajectoryID(), bucketNumber);
+                    sum++;
+                    if (sum >= bucketCapacity) {
+                        ++bucketNumber;
+                        sum = 0;
+                    }
+                }
+
+        }
+
+        return partitioning;
+
+
     }
 
     private static HashMap<Integer,Integer> assignTrajsToBuckets(Iterator<Trajectory> sortedTrajs, final int bucketCapacity) {

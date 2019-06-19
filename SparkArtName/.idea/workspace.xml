@@ -2,43 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c7ad4946-2599-47ac-a591-cd1cdd03a694" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/partitioning/methods/HybridPartitioning.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/utilities/TimeSlice.java" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/map/functions/TrajToTSTrajs.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/map/functions/TrajToTSTrajs.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/partitioning/methods/TimeSlicing$4.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/target/classes/partitioning/methods/VerticalPartitioning$4.class" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/partitioning/methods/HorizontalPartitioning$1.class" afterPath="$PROJECT_DIR$/target/classes/partitioning/methods/HorizontalPartitioning$1.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/partitioning/methods/HorizontalPartitioning$2.class" afterPath="$PROJECT_DIR$/target/classes/partitioning/methods/HorizontalPartitioning$2.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/partitioning/methods/HorizontalPartitioning$3.class" afterPath="$PROJECT_DIR$/target/classes/partitioning/methods/HorizontalPartitioning$3.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/partitioning/methods/HorizontalPartitioning$4.class" afterPath="$PROJECT_DIR$/target/classes/partitioning/methods/HorizontalPartitioning$4.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/partitioning/methods/HorizontalPartitioning$5.class" afterPath="$PROJECT_DIR$/target/classes/partitioning/methods/HorizontalPartitioning$5.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/partitioning/methods/HorizontalPartitioning$6.class" afterPath="$PROJECT_DIR$/target/classes/partitioning/methods/HorizontalPartitioning$6.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/partitioning/methods/HorizontalPartitioning.class" afterPath="$PROJECT_DIR$/target/classes/partitioning/methods/HorizontalPartitioning.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/partitioning/methods/TimeSlicing$1.class" afterPath="$PROJECT_DIR$/target/classes/partitioning/methods/TimeSlicing$1.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/partitioning/methods/TimeSlicing$2.class" afterPath="$PROJECT_DIR$/target/classes/partitioning/methods/TimeSlicing$2.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/partitioning/methods/TimeSlicing$3.class" afterPath="$PROJECT_DIR$/target/classes/partitioning/methods/TimeSlicing$3.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/partitioning/methods/TimeSlicing.class" afterPath="$PROJECT_DIR$/target/classes/partitioning/methods/TimeSlicing.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/partitioning/methods/VerticalPartitioning$1.class" afterPath="$PROJECT_DIR$/target/classes/partitioning/methods/VerticalPartitioning$1.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/partitioning/methods/VerticalPartitioning$2.class" afterPath="$PROJECT_DIR$/target/classes/partitioning/methods/VerticalPartitioning$2.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/partitioning/methods/VerticalPartitioning$3.class" afterPath="$PROJECT_DIR$/target/classes/partitioning/methods/VerticalPartitioning$3.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/partitioning/methods/VerticalPartitioning.class" afterPath="$PROJECT_DIR$/target/classes/partitioning/methods/VerticalPartitioning.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/trie/Node.class" afterPath="$PROJECT_DIR$/target/classes/trie/Node.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/trie/Query.class" afterPath="$PROJECT_DIR$/target/classes/trie/Query.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/trie/Trie.class" afterPath="$PROJECT_DIR$/target/classes/trie/Trie.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/utilities/Connection.class" afterPath="$PROJECT_DIR$/target/classes/utilities/Connection.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/utilities/NodeRef.class" afterPath="$PROJECT_DIR$/target/classes/utilities/NodeRef.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/classes/utilities/Trajectory.class" afterPath="$PROJECT_DIR$/target/classes/utilities/Trajectory.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../.idea/workspace.xml" afterPath="$PROJECT_DIR$/../.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/partitioning/methods/HorizontalPartitioning.java" afterPath="$PROJECT_DIR$/src/main/java/partitioning/methods/HorizontalPartitioning.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/partitioning/methods/TimeSlicing.java" afterPath="$PROJECT_DIR$/src/main/java/partitioning/methods/TimeSlicing.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/partitioning/methods/VerticalPartitioning.java" afterPath="$PROJECT_DIR$/src/main/java/partitioning/methods/VerticalPartitioning.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/trie/Query.java" afterPath="$PROJECT_DIR$/src/main/java/trie/Query.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/partitioning/methods/HybridPartitioning.java" afterPath="$PROJECT_DIR$/src/main/java/partitioning/methods/HybridPartitioning.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/utilities/Intervals.java" afterPath="$PROJECT_DIR$/src/main/java/utilities/Intervals.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/utilities/Stats.java" afterPath="$PROJECT_DIR$/src/main/java/utilities/Stats.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/utilities/Trajectory.java" afterPath="$PROJECT_DIR$/src/main/java/utilities/Trajectory.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -63,8 +29,8 @@
       <file leaf-file-name="VerticalPartitioning.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/partitioning/methods/VerticalPartitioning.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="316">
-              <caret line="71" column="60" lean-forward="false" selection-start-line="71" selection-start-column="60" selection-end-line="71" selection-end-column="60" />
+            <state relative-caret-position="196">
+              <caret line="96" column="90" lean-forward="false" selection-start-line="96" selection-start-column="8" selection-end-line="96" selection-end-column="90" />
               <folding />
             </state>
           </provider>
@@ -73,18 +39,30 @@
       <file leaf-file-name="TimeSlicing.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/partitioning/methods/TimeSlicing.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="240">
-              <caret line="48" column="59" lean-forward="false" selection-start-line="48" selection-start-column="59" selection-end-line="48" selection-end-column="59" />
+            <state relative-caret-position="271">
+              <caret line="86" column="71" lean-forward="false" selection-start-line="86" selection-start-column="0" selection-end-line="92" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="HybridPartitioning.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="HybridPartitioning.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/partitioning/methods/HybridPartitioning.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="569">
-              <caret line="203" column="83" lean-forward="true" selection-start-line="203" selection-start-column="83" selection-end-line="203" selection-end-column="83" />
+            <state relative-caret-position="301">
+              <caret line="228" column="29" lean-forward="true" selection-start-line="228" selection-start-column="29" selection-end-line="228" selection-end-column="29" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="TimeSlice.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/utilities/TimeSlice.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="436">
+              <caret line="44" column="10" lean-forward="false" selection-start-line="44" selection-start-column="10" selection-end-line="44" selection-end-column="10" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -95,31 +73,9 @@
       <file leaf-file-name="Query.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/trie/Query.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1590">
+            <state relative-caret-position="526">
               <caret line="134" column="26" lean-forward="false" selection-start-line="134" selection-start-column="26" selection-end-line="134" selection-end-column="26" />
-              <folding>
-                <element signature="imports" expanded="false" />
-                <element signature="e#1344#1345#0" expanded="false" />
-                <element signature="e#1374#1375#0" expanded="false" />
-                <element signature="e#1416#1417#0" expanded="false" />
-                <element signature="e#1454#1455#0" expanded="false" />
-                <element signature="e#1489#1490#0" expanded="false" />
-                <element signature="e#1523#1524#0" expanded="false" />
-                <element signature="e#1572#1573#0" expanded="false" />
-                <element signature="e#1609#1610#0" expanded="false" />
-                <element signature="e#1647#1648#0" expanded="false" />
-                <element signature="e#1682#1683#0" expanded="false" />
-                <element signature="e#1717#1718#0" expanded="false" />
-                <element signature="e#1750#1751#0" expanded="false" />
-                <element signature="e#1796#1797#0" expanded="false" />
-                <element signature="e#1831#1832#0" expanded="false" />
-                <element signature="e#2069#2070#0" expanded="false" />
-                <element signature="e#2114#2115#0" expanded="false" />
-                <element signature="e#2168#2169#0" expanded="false" />
-                <element signature="e#2216#2217#0" expanded="false" />
-                <element signature="e#2266#2267#0" expanded="false" />
-                <element signature="e#2310#2311#0" expanded="false" />
-              </folding>
+              <folding />
             </state>
           </provider>
         </entry>
@@ -127,31 +83,10 @@
       <file leaf-file-name="Trajectory.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/utilities/Trajectory.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1140">
+            <state relative-caret-position="108">
               <caret line="90" column="0" lean-forward="false" selection-start-line="90" selection-start-column="0" selection-end-line="90" selection-end-column="0" />
               <folding>
-                <element signature="e#496#497#0" expanded="false" />
-                <element signature="e#529#530#0" expanded="false" />
-                <element signature="e#565#566#0" expanded="false" />
-                <element signature="e#600#601#0" expanded="false" />
-                <element signature="e#637#638#0" expanded="false" />
-                <element signature="e#681#682#0" expanded="false" />
-                <element signature="e#716#717#0" expanded="false" />
-                <element signature="e#778#779#0" expanded="false" />
-                <element signature="e#823#824#0" expanded="false" />
-                <element signature="e#858#859#0" expanded="false" />
-                <element signature="e#894#895#0" expanded="false" />
-                <element signature="e#936#937#0" expanded="false" />
-                <element signature="e#1336#1337#0" expanded="false" />
-                <element signature="e#1384#1385#0" expanded="false" />
-                <element signature="e#1959#1960#0" expanded="false" />
-                <element signature="e#2005#2006#0" expanded="false" />
-                <element signature="e#2040#2041#0" expanded="false" />
-                <element signature="e#2074#2075#0" expanded="false" />
-                <element signature="e#2495#2496#0" expanded="false" />
-                <element signature="e#2543#2544#0" expanded="false" />
-                <element signature="e#2602#2603#0" expanded="false" />
-                <element signature="e#2646#2647#0" expanded="false" />
+                <element signature="imports" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -160,20 +95,18 @@
       <file leaf-file-name="Stats.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/utilities/Stats.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2160">
-              <caret line="155" column="29" lean-forward="false" selection-start-line="155" selection-start-column="29" selection-end-line="155" selection-end-column="29" />
-              <folding>
-                <element signature="imports" expanded="false" />
-              </folding>
+            <state relative-caret-position="175">
+              <caret line="123" column="21" lean-forward="false" selection-start-line="123" selection-start-column="21" selection-end-line="123" selection-end-column="21" />
+              <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Intervals.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Intervals.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/utilities/Intervals.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="160">
-              <caret line="99" column="0" lean-forward="true" selection-start-line="99" selection-start-column="0" selection-end-line="99" selection-end-column="0" />
+            <state relative-caret-position="226">
+              <caret line="41" column="28" lean-forward="false" selection-start-line="41" selection-start-column="19" selection-end-line="41" selection-end-column="28" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -193,13 +126,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>de</find>
-      <find>determi</find>
-      <find>determin</find>
-      <find>determineSlic</find>
-      <find>determineSli</find>
-      <find>determineSl</find>
-      <find>determineS</find>
       <find>determine</find>
       <find>determineTimeSlice</find>
       <find>listiszeor</find>
@@ -215,7 +141,6 @@
       <find>nofpartition</find>
       <find>nofTries</find>
       <find>noftries</find>
-      <find>noftra</find>
       <find>.min</find>
       <find>noftrajs</find>
       <find>acc</find>
@@ -223,6 +148,14 @@
       <find>nofTrajsOnEachNode</find>
       <find>timesk</find>
       <find>buckets.</find>
+      <find>buckets</find>
+      <find>bucket</find>
+      <find>IntStream.range(</find>
+      <find>nofPartitions</find>
+      <find>hybrid1</find>
+      <find>nofRoadSlices</find>
+      <find>noftra</find>
+      <find>sortbykey</find>
     </findStrings>
     <replaceStrings>
       <replace>StringBuilder</replace>
@@ -285,7 +218,6 @@
         <option value="$PROJECT_DIR$/src/main/java/map/functions/HCSVRecToTrajME2.java" />
         <option value="$PROJECT_DIR$/src/main/java/partitioning/methods/HorizontalPartitioning.java" />
         <option value="$PROJECT_DIR$/src/main/java/trie/Node.java" />
-        <option value="$PROJECT_DIR$/src/main/java/utilities/Intervals.java" />
         <option value="$PROJECT_DIR$/src/main/java/utilities/Trajectory.java" />
         <option value="$PROJECT_DIR$/src/main/java/trie/Query.java" />
         <option value="$PROJECT_DIR$/src/main/java/utilities/TimeSlice.java" />
@@ -293,6 +225,7 @@
         <option value="$PROJECT_DIR$/src/main/java/partitioning/methods/VerticalPartitioning.java" />
         <option value="$PROJECT_DIR$/src/main/java/partitioning/methods/TimeSlicing.java" />
         <option value="$PROJECT_DIR$/src/main/java/partitioning/methods/HybridPartitioning.java" />
+        <option value="$PROJECT_DIR$/src/main/java/utilities/Intervals.java" />
       </list>
     </option>
   </component>
@@ -1030,7 +963,7 @@
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
       <option name="MAIN_CLASS_NAME" value="partitioning.methods.HybridPartitioning" />
       <option name="VM_PARAMETERS" value="" />
-      <option name="PROGRAM_PARAMETERS" value="10 10" />
+      <option name="PROGRAM_PARAMETERS" value="10 10 1000" />
       <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
@@ -1112,7 +1045,7 @@
       <workItem from="1559569347494" duration="3788000" />
       <workItem from="1560763821023" duration="21014000" />
       <workItem from="1560847888809" duration="21550000" />
-      <workItem from="1560892966706" duration="2479000" />
+      <workItem from="1560892966706" duration="13346000" />
     </task>
     <task id="LOCAL-00001" summary="first commit">
       <created>1547227262901</created>
@@ -1205,11 +1138,18 @@
       <option name="project" value="LOCAL" />
       <updated>1560769393980</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="first Hybrid Approach">
+      <created>1560936464632</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1560936464632</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1118856000" />
+    <option name="totallyTimeSpent" value="1129723000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-1" y="0" width="1922" height="1055" extended-state="6" />
@@ -1228,6 +1168,7 @@
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.42077088" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="13" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31905782" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Java Enterprise" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -1245,7 +1186,6 @@
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24961948" sideWeight="0.5" order="9" side_tool="false" content_ui="combo" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31905782" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Documentation" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="FLOATING" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" x="99" y="100" width="1162" height="543" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="12" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.31905782" sideWeight="0.49786553" order="8" side_tool="false" content_ui="tabs" />
@@ -1264,7 +1204,8 @@
     <MESSAGE value="removed joins. added map method" />
     <MESSAGE value="removed flatMapValues from trie creation" />
     <MESSAGE value="update" />
-    <option name="LAST_COMMIT_MESSAGE" value="update" />
+    <MESSAGE value="first Hybrid Approach" />
+    <option name="LAST_COMMIT_MESSAGE" value="first Hybrid Approach" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1301,7 +1242,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/utilities/Intervals.java</url>
-          <line>254</line>
+          <line>246</line>
           <properties />
           <option name="timeStamp" value="62" />
         </line-breakpoint>
@@ -1310,12 +1251,6 @@
           <line>118</line>
           <properties />
           <option name="timeStamp" value="66" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/utilities/Intervals.java</url>
-          <line>332</line>
-          <properties />
-          <option name="timeStamp" value="67" />
         </line-breakpoint>
       </breakpoints>
       <breakpoints-dialog>
@@ -1631,67 +1566,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/utilities/Trajectory.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1140">
-          <caret line="90" column="0" lean-forward="false" selection-start-line="90" selection-start-column="0" selection-end-line="90" selection-end-column="0" />
-          <folding>
-            <element signature="e#496#497#0" expanded="false" />
-            <element signature="e#529#530#0" expanded="false" />
-            <element signature="e#565#566#0" expanded="false" />
-            <element signature="e#600#601#0" expanded="false" />
-            <element signature="e#637#638#0" expanded="false" />
-            <element signature="e#681#682#0" expanded="false" />
-            <element signature="e#716#717#0" expanded="false" />
-            <element signature="e#778#779#0" expanded="false" />
-            <element signature="e#823#824#0" expanded="false" />
-            <element signature="e#858#859#0" expanded="false" />
-            <element signature="e#894#895#0" expanded="false" />
-            <element signature="e#936#937#0" expanded="false" />
-            <element signature="e#1336#1337#0" expanded="false" />
-            <element signature="e#1384#1385#0" expanded="false" />
-            <element signature="e#1959#1960#0" expanded="false" />
-            <element signature="e#2005#2006#0" expanded="false" />
-            <element signature="e#2040#2041#0" expanded="false" />
-            <element signature="e#2074#2075#0" expanded="false" />
-            <element signature="e#2495#2496#0" expanded="false" />
-            <element signature="e#2543#2544#0" expanded="false" />
-            <element signature="e#2602#2603#0" expanded="false" />
-            <element signature="e#2646#2647#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/trie/Query.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1590">
-          <caret line="134" column="26" lean-forward="false" selection-start-line="134" selection-start-column="26" selection-end-line="134" selection-end-column="26" />
-          <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#1344#1345#0" expanded="false" />
-            <element signature="e#1374#1375#0" expanded="false" />
-            <element signature="e#1416#1417#0" expanded="false" />
-            <element signature="e#1454#1455#0" expanded="false" />
-            <element signature="e#1489#1490#0" expanded="false" />
-            <element signature="e#1523#1524#0" expanded="false" />
-            <element signature="e#1572#1573#0" expanded="false" />
-            <element signature="e#1609#1610#0" expanded="false" />
-            <element signature="e#1647#1648#0" expanded="false" />
-            <element signature="e#1682#1683#0" expanded="false" />
-            <element signature="e#1717#1718#0" expanded="false" />
-            <element signature="e#1750#1751#0" expanded="false" />
-            <element signature="e#1796#1797#0" expanded="false" />
-            <element signature="e#1831#1832#0" expanded="false" />
-            <element signature="e#2069#2070#0" expanded="false" />
-            <element signature="e#2114#2115#0" expanded="false" />
-            <element signature="e#2168#2169#0" expanded="false" />
-            <element signature="e#2216#2217#0" expanded="false" />
-            <element signature="e#2266#2267#0" expanded="false" />
-            <element signature="e#2310#2311#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/utilities/Parallelism.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="90">
@@ -1700,53 +1574,72 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/utilities/TimeSlice.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/utilities/Trajectory.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="480">
-          <caret line="53" column="5" lean-forward="false" selection-start-line="53" selection-start-column="5" selection-end-line="53" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/utilities/Stats.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2160">
-          <caret line="155" column="29" lean-forward="false" selection-start-line="155" selection-start-column="29" selection-end-line="155" selection-end-column="29" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/partitioning/methods/TimeSlicing.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="48" column="59" lean-forward="false" selection-start-line="48" selection-start-column="59" selection-end-line="48" selection-end-column="59" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/partitioning/methods/HybridPartitioning.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="569">
-          <caret line="203" column="83" lean-forward="true" selection-start-line="203" selection-start-column="83" selection-end-line="203" selection-end-column="83" />
+        <state relative-caret-position="108">
+          <caret line="90" column="0" lean-forward="false" selection-start-line="90" selection-start-column="0" selection-end-line="90" selection-end-column="0" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/trie/Query.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="526">
+          <caret line="134" column="26" lean-forward="false" selection-start-line="134" selection-start-column="26" selection-end-line="134" selection-end-column="26" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/partitioning/methods/TimeSlicing.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="271">
+          <caret line="86" column="71" lean-forward="false" selection-start-line="86" selection-start-column="0" selection-end-line="92" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/partitioning/methods/VerticalPartitioning.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="316">
-          <caret line="71" column="60" lean-forward="false" selection-start-line="71" selection-start-column="60" selection-end-line="71" selection-end-column="60" />
+        <state relative-caret-position="196">
+          <caret line="96" column="90" lean-forward="false" selection-start-line="96" selection-start-column="8" selection-end-line="96" selection-end-column="90" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/utilities/TimeSlice.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="436">
+          <caret line="44" column="10" lean-forward="false" selection-start-line="44" selection-start-column="10" selection-end-line="44" selection-end-column="10" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/utilities/Stats.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="175">
+          <caret line="123" column="21" lean-forward="false" selection-start-line="123" selection-start-column="21" selection-end-line="123" selection-end-column="21" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/utilities/Intervals.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="160">
-          <caret line="99" column="0" lean-forward="true" selection-start-line="99" selection-start-column="0" selection-end-line="99" selection-end-column="0" />
+        <state relative-caret-position="226">
+          <caret line="41" column="28" lean-forward="false" selection-start-line="41" selection-start-column="19" selection-end-line="41" selection-end-column="28" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/partitioning/methods/HybridPartitioning.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="301">
+          <caret line="228" column="29" lean-forward="true" selection-start-line="228" selection-start-column="29" selection-end-line="228" selection-end-column="29" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>

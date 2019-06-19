@@ -90,7 +90,10 @@ public class HybridPartitioning {
 
         int roadSlice =TimeSlice.determineRoadSlices(trajectory);;
 
-        return timeSlice*roadSlice;
+        double cantor = 0.5 *(timeSlice+roadSlice)*(timeSlice+roadSlice +1) + roadSlice;
+        int cantorID= (int) cantor;
+
+        return cantorID;
 
     }
 
@@ -101,9 +104,12 @@ public class HybridPartitioning {
 
         int nofTimeSlices = Integer.parseInt(args[0]);
         int nofRoadSlices = Integer.parseInt(args[1]);
+        int bucketCapacity= Integer.parseInt(args[2]);
+//        int nofPartitions = nofRoadSlices*nofTimeSlices; // hybrid1
         int nofPartitions = nofRoadSlices*nofTimeSlices;
 
-        String appName = HybridPartitioning.class.getSimpleName() + (nofPartitions);
+        String configuration =":"+nofTimeSlices+","+nofRoadSlices+","+bucketCapacity;
+        String appName = HybridPartitioning.class.getSimpleName() + (configuration);
 
 //        String fileName = "hdfs:////rssd.csv";
 //        String queryFile = "hdfs:////rssq.csv";
@@ -130,7 +136,7 @@ public class HybridPartitioning {
 
         JavaPairRDD<Integer, Trajectory> trajectoryDataset = records.groupBy(csv -> csv.getTrajID()).mapValues(new CSVRecToTrajME());
 
-//        HashMap<Integer, Integer> buckets = Intervals.hybridSlicing(trajectoryDataset, nofRoadSlices);
+
 
 
 
@@ -141,6 +147,20 @@ public class HybridPartitioning {
             return new Tuple2<>(trajectory._2().getPartitionID(), trajectory._2());
         });
 
+        /**********************hybrid2 approach**********************/
+        HashMap<Integer, Integer> buckets = Intervals.hybridSlicing(trajectoryDataset, bucketCapacity);
+
+        trajectoryDataset = trajectoryDataset.mapToPair(trajectory -> {
+            Integer bucket = buckets.get(trajectory._2().getTrajectoryID());
+
+            trajectory._2().setPartitionID(bucket);
+            return new Tuple2<>(trajectory._2().getPartitionID(), trajectory._2());
+        });
+        nofPartitions = Math.toIntExact(buckets.values().stream().distinct().count());
+        List<Integer> partitions = IntStream.range(0, nofPartitions).boxed().collect(toList());
+        /**********************hybrid2 approach**********************/
+
+
         List<Tuple2<Integer, Integer>> nofTrajsList=Stats.nofTrajsOnEachNode(trajectoryDataset,sc);
 
 
@@ -149,7 +169,8 @@ public class HybridPartitioning {
 
 
         System.out.println("nofPartitions:" + nofPartitions);
-        List<Integer> partitions = IntStream.range(0, nofPartitions).boxed().collect(toList());
+        //uncomment this for hybrid1
+//        List<Integer> partitions = IntStream.range(0, nofPartitions).boxed().collect(toList());
 
         JavaRDD<Integer> partitionsRDD = sc.parallelize(partitions);
         JavaPairRDD<Integer, Trie> emptyTrieRDD = partitionsRDD.mapToPair(new PairFunction<Integer, Integer, Trie>() {
