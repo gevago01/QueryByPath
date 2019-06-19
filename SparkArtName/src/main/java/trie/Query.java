@@ -19,25 +19,6 @@ public class Query implements Serializable {
     public IntArrayList pathSegments = new IntArrayList();
 
 
-    public Query(Trajectory t, List<Integer> roadIntervals, PartitioningMethods pm) {
-
-
-        this(t.getStartingTime(),t.getEndingTime(),t.roadSegments);
-//        queryID=counter++;
-
-        if (pm == PartitioningMethods.VERTICAL) {
-            int x = new StartingRSPartitioner(roadIntervals,0).getPartition2(t.roadSegments.get(0));
-            partitionID = x;
-        }
-        else if (pm == PartitioningMethods.TIME_SLICING) {
-            List<Integer> timeSlices=determineTimeSlice(roadIntervals);
-//            partitionID=timeSlices.get(new Random().nextInt(timeSlices.size())) % Parallelism.PARALLELISM;
-            partitionID =timeSlices.get(new Random().nextInt(timeSlices.size())) ;
-        }
-        else if(pm == PartitioningMethods.HORIZONTAL) {
-            //do nothing
-        }
-    }
 
     /**
      * called for time slicing
@@ -121,32 +102,7 @@ public class Query implements Serializable {
     }
 
 
-    public List<Integer> determineTimeSlice(List<Integer> timePeriods) {
-        List<Integer> timeSlices = new ArrayList<>();
-        boolean foundMax = false;
-        int minIndex = -1, maxIndex = -1;
-        for (int i = 0; i < timePeriods.size(); i++) {
 
-
-            if (startingTime >= timePeriods.get(i)) {
-                minIndex = i;
-            }
-
-            if (endingTime <= timePeriods.get(i) && !foundMax) {
-                foundMax = true;
-                maxIndex = i;
-            }
-
-        }
-
-        //make sure you don't need equal here
-        for (int i = minIndex; i < maxIndex; i++) {
-            timeSlices.add(i);
-        }
-
-        return timeSlices;
-
-    }
 
     public List<Integer> determineTimeSliceLongs(List<Long> timePeriods) {
         List<Integer> timeSlices = new ArrayList<>();

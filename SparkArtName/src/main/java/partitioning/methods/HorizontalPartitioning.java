@@ -24,7 +24,6 @@ import trie.Query;
 import trie.Trie;
 import utilities.*;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.IntStream;
 
@@ -264,7 +263,7 @@ public class HorizontalPartitioning {
 //        }).values().collect();
 //        Stats.printStats(lengthList);
 //        Stats.nofQueriesOnEachNode(queries, PartitioningMethods.HORIZONTAL);
-        Stats.nofTrajsOnEachNode(trajectoryDataset, PartitioningMethods.HORIZONTAL);
+        Stats.nofTrajsOnEachNode(trajectoryDataset, sc);
 //        Stats.nofTrajsInEachSlice(trajectoryDataset, PartitioningMethods.HORIZONTAL);
 //        Stats.nofQueriesInSlice(queries, PartitioningMethods.HORIZONTAL);
 

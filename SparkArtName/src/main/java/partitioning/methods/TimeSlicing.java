@@ -8,7 +8,6 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFunction;
-import org.apache.spark.api.java.function.VoidFunction;
 import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.util.DoubleAccumulator;
 import org.apache.spark.util.LongAccumulator;
@@ -29,16 +28,15 @@ public class TimeSlicing {
 
 
     public static void main(String[] args) {
-        int numberOfSlices = Integer.parseInt(args[0]);
+        int bucketCapacity = Integer.parseInt(args[0]);
 
-        String appName = TimeSlicing.class.getSimpleName() + numberOfSlices;
+        String appName = TimeSlicing.class.getSimpleName() + bucketCapacity;
 
 
 //        String fileName = "hdfs:////rssd.csv";
 //        String queryFile = "hdfs:////rssq.csv";
-
-//        String fileName = "hdfs:////timeSkewedDataset.csv";
-//        String queryFile = "hdfs:////timeSkewedQueries";
+        String fileName = "hdfs:////timeSkewedDataset.csv";
+        String queryFile = "hdfs:////timeSkewedQueries";
 //        String fileName = "hdfs:////roadSegmentSkewedDataset.csv";
 //        String queryFile = "hdfs:////roadSegmentSkewedQueries";
 
@@ -50,8 +48,8 @@ public class TimeSlicing {
 
 //        String fileName = "file:///mnt/hgfs/VM_SHARED/trajDatasets/concatTrajectoryDataset.csv";
 //        String queryFile = "file:///mnt/hgfs/VM_SHARED/trajDatasets/concatTrajectoryDataset.csv";
-        String fileName = "file:///mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
-        String queryFile = "file:///mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
+//        String fileName = "file:///mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
+//        String queryFile = "file:///mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
 //        String queryFile = "file:///mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
 //        String queryFile = "file:///mnt/hgfs/VM_SHARED/trajDatasets/queryRecords.csv";
 
@@ -61,11 +59,11 @@ public class TimeSlicing {
 
 
 
-        SparkConf conf = new SparkConf().setAppName(appName).setMaster("local[*]")
-                .set("spark.executor.instances", "" + Parallelism.PARALLELISM)
-                .set("spark.driver.maxResultSize", "3G");
-//        SparkConf conf = new SparkConf().
-//                setAppName(appName);
+//        SparkConf conf = new SparkConf().setAppName(appName).setMaster("local[*]")
+//                .set("spark.executor.instances", "" + Parallelism.PARALLELISM)
+//                .set("spark.driver.maxResultSize", "3G");
+        SparkConf conf = new SparkConf().
+                setAppName(appName);
 
 
         JavaSparkContext sc = new JavaSparkContext(conf);
@@ -80,10 +78,10 @@ public class TimeSlicing {
 
 
 
-        JavaPairRDD<Integer, Trajectory> trajectoryDataset = records.groupBy(csv -> csv.getTrajID()).mapValues(new CSVRecToTrajME()).mapToPair(pair -> new Tuple2<>(pair._2().getPartitionID(), pair._2()));//filter(new ReduceNofTrajectories());
+        JavaPairRDD<Integer, Trajectory> trajectoryDataset = records.groupBy(csv -> csv.getTrajID()).mapValues(new CSVRecToTrajME());
 
 
-        HashMap<Integer, Integer> buckets = Intervals.sliceTSToBuckets2(trajectoryDataset, numberOfSlices);
+        HashMap<Integer, Integer> buckets = Intervals.sliceTSToBuckets2(trajectoryDataset, bucketCapacity);
 
 //        buckets.
         trajectoryDataset = trajectoryDataset.mapToPair(trajectory -> {
@@ -93,7 +91,7 @@ public class TimeSlicing {
             return new Tuple2<>(trajectory._2().getPartitionID(), trajectory._2());
         });
 
-        Stats.nofTrajsOnEachNode(trajectoryDataset, PartitioningMethods.TIME_SLICING);
+        Stats.nofTrajsOnEachNode(trajectoryDataset, sc);
 //        Stats.nofTrajsInEachSlice(trajectoryDataset, PartitioningMethods.TIME_SLICING);
 
         //records RDD not needed any more
@@ -114,7 +112,7 @@ public class TimeSlicing {
             }
         });
 
-        assert (partitions.size() == numberOfSlices && partitionsRDD.count() == numberOfSlices);
+        assert (partitions.size() == bucketCapacity && partitionsRDD.count() == bucketCapacity);
 
 
 //        emptyTrieRDD.foreach(new VoidFunction<Tuple2<Integer, Trie>>() {
@@ -154,14 +152,6 @@ public class TimeSlicing {
 
         long noftries=trieRDD.count();
         System.out.println("noftries:"+noftries);
-
-        trieRDD.foreach(new VoidFunction<Tuple2<Integer, Trie>>() {
-            @Override
-            public void call(Tuple2<Integer, Trie> integerTrieTuple2) throws Exception {
-                System.out.println("trajCounter:"+integerTrieTuple2._2.getTrajectoryCounter());
-            }
-        });
-
         System.out.println("Done. Tries build");
 //        Query q = new Query(trajectory.getStartingTime(), trajectory.getEndingTime(), trajectory.roadSegments);
 //        List<Integer> times_slices = q.determineTimeSlice(timePeriods);
@@ -180,7 +170,6 @@ public class TimeSlicing {
 //        Stats.nofQueriesInSlice(queries, PartitioningMethods.TIME_SLICING);
         System.out.println("appName:" + appName);
 
-        System.out.println("TrieNofPartitions:" + trieRDD.rdd().partitions().length);
 
         System.out.println("TrieNofPartitions:" + trieRDD.rdd().partitions().length);
 //        Stats.nofQueriesOnEachNode(queries, PartitioningMethods.TIME_SLICING);

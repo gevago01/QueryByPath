@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Trajectory implements Serializable {
+public class Trajectory implements Serializable, Comparable<Trajectory> {
 
     public int trajectoryID;
     private int partitionID;
@@ -88,34 +88,7 @@ public class Trajectory implements Serializable {
         return sb.toString();
     }
 
-    public List<Integer> determineTimeSlices(final List<Long> timePeriods) throws Exception {
-        List<Integer> timeSlices = new ArrayList<>();
-        boolean foundMax = false;
-        int minIndex = -1, maxIndex = -1;
-        for (int i = 0; i < timePeriods.size(); i++) {
 
-
-            if (getStartingTime() >= timePeriods.get(i)) {
-                minIndex = i;
-            }
-
-            if (getEndingTime() <= timePeriods.get(i) && !foundMax) {
-                foundMax = true;
-                maxIndex = i;
-            }
-
-        }
-
-        assert (minIndex != maxIndex);
-        assert (minIndex < maxIndex);
-        //make sure you don't need equal here
-        for (int i = minIndex; i < maxIndex; i++) {
-            timeSlices.add(i);
-        }
-
-        assert (!timeSlices.isEmpty());
-        return timeSlices;
-    }
 
 
     public void setPartitionID(int partitionID) {
@@ -176,5 +149,18 @@ public class Trajectory implements Serializable {
 
         assert (!timeSlices.isEmpty());
         return timeSlices;
+    }
+
+    @Override
+    public int compareTo(Trajectory t){
+        int compare = getStartingRS()-t.getStartingRS();
+
+        //they belong to the same road segment
+        if (compare==0){
+            compare= ((Long) getStartingTime()).compareTo(t.getStartingTime());
+        }
+
+        return compare;
+
     }
 }

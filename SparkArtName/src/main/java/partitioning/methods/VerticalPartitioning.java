@@ -8,7 +8,6 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFunction;
-import org.apache.spark.api.java.function.VoidFunction;
 import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.util.DoubleAccumulator;
 import org.apache.spark.util.LongAccumulator;
@@ -34,29 +33,28 @@ public class VerticalPartitioning {
     public static void main(String[] args) {
 
 
-        int nofVerticalSlices = Integer.parseInt(args[0]);
-//        String fileName = "hdfs:////timeSkewedDataset.csv";
-//        String queryFile = "hdfs:////timeSkewedQueries";
-
+        int bucketCapacity = Integer.parseInt(args[0]);
+        String fileName = "hdfs:////timeSkewedDataset.csv";
+        String queryFile = "hdfs:////timeSkewedQueries";
 //        String fileName = "hdfs:////rssd.csv";
 //        String queryFile = "hdfs:////rssq.csv";
 
 //        String fileName = "hdfs:////roadSegmentSkewedDataset.csv";
 //        String queryFile = "hdfs:////roadSegmentSkewedQueries";
 //        String fileName = "file:////mnt/hgfs/VM_SHARED/trajDatasets/concatTrajectoryDataset.csv";
-        String fileName = "file:////mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
-        String queryFile = "file:////mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
+//        String fileName = "file:////mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
+//        String queryFile = "file:////mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
 //        String fileName = "file:///mnt/hgfs/VM_SHARED/samplePort.csv";
 
 //        String queryFile = "file:///mnt/hgfs/VM_SHARED/trajDatasets/queryRecords.csv";
 //        String queryFile = "file:////data/queryRecords.csv";
 //        String fileName = "hdfs:////concatTrajectoryDataset.csv";
 //        String queryFile = "hdfs:////concatTrajectoryQueries";
-        SparkConf conf = new SparkConf().setAppName(VerticalPartitioning.class.getSimpleName() + nofVerticalSlices)
-                .setMaster("local[*]")
-                .set("spark.executor.instances", "" + Parallelism.PARALLELISM);
-//        SparkConf conf = new SparkConf().
-//                setAppName(VerticalPartitioning.class.getSimpleName() + nofVerticalSlices);
+//        SparkConf conf = new SparkConf().setAppName(VerticalPartitioning.class.getSimpleName() + bucketCapacity)
+//                .setMaster("local[*]")
+//                .set("spark.executor.instances", "" + Parallelism.PARALLELISM);
+        SparkConf conf = new SparkConf().
+                setAppName(VerticalPartitioning.class.getSimpleName() + bucketCapacity);
 
         JavaSparkContext sc = new JavaSparkContext(conf);
         LongAccumulator queryLengthSum = sc.sc().longAccumulator("queryLengthSum");
@@ -71,7 +69,7 @@ public class VerticalPartitioning {
 
         JavaPairRDD<Integer, Trajectory> trajectoryDataset = records.groupBy(csv -> csv.getTrajID()).mapValues(new CSVRecToTrajME());
 
-        Map<Integer, Integer> buckets = Intervals.sliceRSToBuckets2(trajectoryDataset, nofVerticalSlices);
+        Map<Integer, Integer> buckets = Intervals.sliceRSToBuckets2(trajectoryDataset, bucketCapacity);
 
         trajectoryDataset = trajectoryDataset.mapToPair(trajectory -> {
             Integer bucket = buckets.get(trajectory._2().getTrajectoryID());
@@ -111,7 +109,7 @@ public class VerticalPartitioning {
         });
 
 //        Stats.nofQueriesOnEachNode(queries, PartitioningMethods.VERTICAL);
-        Stats.nofTrajsOnEachNode(trajectoryDataset, PartitioningMethods.VERTICAL);
+        Stats.nofTrajsOnEachNode(trajectoryDataset, sc);
 
         JavaPairRDD<Integer, Trie> trieRDD =
                 emptyTrieRDD.groupWith(trajectoryDataset).mapValues(new Function<Tuple2<Iterable<Trie>, Iterable<Trajectory>>, Trie>() {
@@ -128,13 +126,8 @@ public class VerticalPartitioning {
 
         long noftries = trieRDD.count();
         System.out.println("nofTries:" + noftries);
+        System.out.println("partitions:"+partitions.size());
 
-        trieRDD.foreach(new VoidFunction<Tuple2<Integer, Trie>>() {
-            @Override
-            public void call(Tuple2<Integer, Trie> integerTrieTuple2) throws Exception {
-                System.out.println("trajCounter:" + integerTrieTuple2._2.getTrajectoryCounter());
-            }
-        });
 
 
         System.out.println("TrieNofPartitions:" + trieRDD.rdd().partitions().length);
