@@ -11,6 +11,58 @@ import java.util.TreeSet;
 
 public class Trie implements Serializable {
     private Node root = Node.getNode(Integer.MAX_VALUE);
+
+    public long getMinTrajLength() {
+        return minTrajLength;
+    }
+
+    public long getMaxTrajLength() {
+        return maxTrajLength;
+    }
+
+    private long minTrajLength=Long.MAX_VALUE;
+    private long maxTrajLength=Long.MIN_VALUE;
+
+    private long minStartingTime=Long.MAX_VALUE;
+    private long maxStartingTime=Long.MIN_VALUE;
+    private int minStartingRS=Integer.MAX_VALUE;
+
+    public int getMinStartingRS() {
+        return minStartingRS;
+    }
+
+    public int getMaxStartingRS() {
+        return maxStartingRS;
+    }
+
+    private int maxStartingRS=Integer.MIN_VALUE;
+
+    public long getHilbertValue() {
+        return hilbertValue;
+    }
+
+    private long hilbertValue;
+
+    public long getMinStartingTime() {
+        return minStartingTime;
+    }
+
+    public long getMaxStartingTime() {
+        return maxStartingTime;
+    }
+
+
+
+
+
+
+
+
+
+    public int getPartitionID() {
+        return partitionID;
+    }
+
     public int partitionID;
     private int horizontalTrieID;
 
@@ -34,31 +86,60 @@ public class Trie implements Serializable {
         return root;
     }
 
-
     public void insertTrajectory2(List<Integer> roadSegments, int trajectoryID, long startingTime, long endingTime) {
-        Node currentNode, child = root;
+        Node currentNode=root, child = root;
         int previousRoadSegment = -1;
 
-        getRoot().addTrajectory(startingTime, trajectoryID);
         for (int i = 0; i < roadSegments.size(); i++) {
             int roadSegment = roadSegments.get(i);
             if (roadSegment == previousRoadSegment) {
                 continue;
             }
             currentNode = child;
-
+// when i==0 currentNode = child = root
             child = currentNode.getChildren(roadSegment);
 
             if (child == null) {
                 child = currentNode.addChild(roadSegment);
+
             }
 
             previousRoadSegment = roadSegment;
         }
-        child.addTrajectory(endingTime, trajectoryID);
+//        child.addTrajectory(endingTime, trajectoryID);
+        child.addStartingTime(startingTime,trajectoryID);
+        child.addEndingTime(endingTime,trajectoryID);
 
 
     }
+
+
+//    public void insertTrajectory2(List<Integer> roadSegments, int trajectoryID, long startingTime, long endingTime) {
+//        Node currentNode, child = root;
+//        int previousRoadSegment = -1;
+//
+//        for (int i = 0; i < roadSegments.size(); i++) {
+//            int roadSegment = roadSegments.get(i);
+//            if (roadSegment == previousRoadSegment) {
+//                continue;
+//            }
+//            currentNode = child;
+//// when i==0 currentNode = child = root
+//            child = currentNode.getChildren(roadSegment);
+//
+//            if (child == null) {
+//                child = currentNode.addChild(roadSegment);
+//
+//            }
+//
+//            previousRoadSegment = roadSegment;
+//        }
+////        child.addTrajectory(endingTime, trajectoryID);
+//        child.addStartingTime(startingTime,trajectoryID);
+//        child.addEndingTime(endingTime,trajectoryID);
+//
+//
+//    }
 //  less memory efficient of insert, inserts all timestamps to the index
 //    public void insertTrajectory(List<String> roadSegments, long trajectoryID, List<Long> timestamps) {
 //        Node currentNode , child = root;
@@ -219,11 +300,51 @@ public class Trie implements Serializable {
                 '}';
     }
 
+    public  void callthis(){
+        System.out.println("nof children:"+getRoot().getAllChildren().size());
+
+    }
 
     public void insertTrajectory2(Trajectory traj) {
         ++trajectoryCounter;
+
+
+        if (traj.getStartingTime()<=minStartingTime) {
+            minStartingTime = traj.getStartingTime();
+        }
+
+        if (traj.getStartingTime()>=maxStartingTime) {
+            maxStartingTime = traj.getStartingTime();
+        }
+//
+        if (traj.getRoadSegments().size()<=minTrajLength) {
+            minTrajLength = traj.getRoadSegments().size();
+        }
+
+        if (traj.getRoadSegments().size()>=maxTrajLength) {
+            maxTrajLength = traj.getRoadSegments().size();
+        }
+
+        if (traj.getStartingRS()<=minStartingRS) {
+            minStartingRS = traj.getStartingRS();
+        }
+
+        if (traj.getStartingRS()>=maxStartingRS) {
+            maxStartingRS = traj.getStartingRS();
+        }
+
+
         insertTrajectory2(traj.roadSegments, traj.trajectoryID, traj.getStartingTime(), traj.getEndingTime());
     }
 
 
+    public boolean checkStartingRS(int startingRoadSegment) {
+
+        return root.checkIfRSExists(startingRoadSegment);
+//        return allStartingRSegments.contains(startingRoadSegment);
+    }
+
+    public void setHilbertValue(Long hilbertValue) {
+        this.hilbertValue = hilbertValue;
+    }
 }

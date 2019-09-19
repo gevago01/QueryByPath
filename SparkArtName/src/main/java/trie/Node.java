@@ -11,13 +11,21 @@ import java.util.stream.Collectors;
 public class Node implements Serializable {
 
     private TreeMap<Integer, Connection> children = new TreeMap<>();
+    private int level = 0;
+    private int roadSegment;
+    private Long2ObjectAVLTreeMap<IntArraySet> timeToTID =new Long2ObjectAVLTreeMap<>();
+    private Long2ObjectAVLTreeMap<IntArraySet> trajectoryStartTime =new Long2ObjectAVLTreeMap<>();
+    private Long2ObjectAVLTreeMap<IntArraySet> trajectoryEndTime =new Long2ObjectAVLTreeMap<>();
+
+    public boolean checkIfRSExists(int k){
+        return children.keySet().contains(k);
+    }
 
     //    private Long2IntAVLTreeMap timeToTID = new Long2IntAVLTreeMap();
 //    private Long2IntAVLTreeMap timeToTID = new Long2IntAVLTreeMap();
     //    private TreeMap<Integer, Set<Integer>>
 
-    private int level = 0;
-    private int roadSegment;
+
 
     public void setLevel(int level) {
         this.level = level;
@@ -66,17 +74,27 @@ public class Node implements Serializable {
 
         return n;
     }
-    private Long2ObjectAVLTreeMap<IntArraySet> timeToTID =new Long2ObjectAVLTreeMap<>();
+
+
     public Collection<Integer> getTrajectories(long startingTime, long endingTime) {
-        SortedMap<Long, IntArraySet> entries = timeToTID.subMap(startingTime, endingTime);
+        SortedMap<Long, IntArraySet> startingEntries = trajectoryStartTime.subMap(startingTime, endingTime);
+        SortedMap<Long, IntArraySet> endingEntries = trajectoryEndTime.subMap(startingTime, endingTime);
 
-        timeToTID.subMap(0,1).keySet();
 
-        final TreeSet<Integer> answer=new TreeSet<>();
-        for (Map.Entry<Long, IntArraySet> entry:entries.entrySet()) {
-            answer.addAll(entry.getValue());
+
+        final TreeSet<Integer> startingAnswer=new TreeSet<>();
+        for (Map.Entry<Long, IntArraySet> entry:startingEntries.entrySet()) {
+            startingAnswer.addAll(entry.getValue());
         }
-        return answer;
+
+        final TreeSet<Integer> endingAnswer=new TreeSet<>();
+        for (Map.Entry<Long, IntArraySet> entry:endingEntries.entrySet()) {
+            endingAnswer.addAll(entry.getValue());
+        }
+
+        startingAnswer.retainAll(endingAnswer);
+        //startingAnswer contains elements in both sets
+        return startingAnswer;
     }
 
     public void addTrajectory(long timestamp, int trajectoryID) {
@@ -90,6 +108,27 @@ public class Node implements Serializable {
         }
     }
 
+    public void addStartingTime(long timestamp, int trajectoryID) {
+        if (trajectoryStartTime.containsKey(timestamp)){
+            trajectoryStartTime.get(timestamp).add(trajectoryID);
+        }
+        else{
+            IntArraySet trajSet=new IntArraySet();
+            trajSet.add(trajectoryID);
+            trajectoryStartTime.put(timestamp,trajSet);
+        }
+    }
+
+    public void addEndingTime(long timestamp, int trajectoryID) {
+        if (trajectoryEndTime.containsKey(timestamp)){
+            trajectoryEndTime.get(timestamp).add(trajectoryID);
+        }
+        else{
+            IntArraySet trajSet=new IntArraySet();
+            trajSet.add(trajectoryID);
+            trajectoryEndTime.put(timestamp,trajSet);
+        }
+    }
 //    private TreeMap<Long, IntArraySet> timeToTID = new TreeMap<>();
 //        public Collection<Integer> getTrajectories(long startingTime, long endingTime) {
 //        SortedMap<Long, IntArraySet> entries = timeToTID.subMap(startingTime, endingTime);

@@ -14,8 +14,7 @@ public class Trajectory implements Serializable, Comparable<Trajectory> {
     private int partitionID;
     public IntArrayList roadSegments = new IntArrayList();
     public LongArrayList timestamps = new LongArrayList();
-
-
+    private long hilbertValue;
 
     public LongArrayList getTimestamps() {
         return timestamps;
@@ -40,9 +39,17 @@ public class Trajectory implements Serializable, Comparable<Trajectory> {
 
 
     public int getStartingRS() {
-        return roadSegments.get(0);
+        return roadSegments.getInt(0);
     }
 
+
+    public long getHilbertValue() {
+        return hilbertValue;
+    }
+
+    public void setHilbertValue(long hilbertValue) {
+        this.hilbertValue = hilbertValue;
+    }
 
     public void addRoadSegment(int roadSegment) {
 //        roadSegments.add(roadSegment.intern());

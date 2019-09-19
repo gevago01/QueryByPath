@@ -16,12 +16,12 @@ public class QuerySynthesizer implements Serializable {
 
 
     public static void synthesize(JavaPairRDD<Integer, Iterable<CSVRecord>> recordsCached) {
-        JavaPairRDD<Integer, Iterable<CSVRecord>> recordSample = recordsCached.sample(false, 0.03);
+        JavaPairRDD<Integer, Iterable<CSVRecord>> recordSample = recordsCached.sample(false, 0.0147);
         List<Tuple2<Integer, Iterable<CSVRecord>>> allRecords = recordSample.collect();
 
         System.out.println("recordSample.count():" + recordSample.groupByKey().keys().count());
         try {
-            BufferedWriter bf = new BufferedWriter(new FileWriter(new File("roadSegmentSkewedQueries")));
+            BufferedWriter bf = new BufferedWriter(new FileWriter(new File(TrajectorySynthesizer.PROBABILITY+"pcLSQueries.csv")));
 //            BufferedWriter bf = new BufferedWriter(new FileWriter(new File("timeSkewedQueries")));
 
             for (Tuple2<Integer, Iterable<CSVRecord>> tuple : allRecords) {

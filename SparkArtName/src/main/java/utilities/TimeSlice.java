@@ -1,6 +1,7 @@
 package utilities;
 
 import comparators.IntegerComparator;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import org.apache.spark.api.java.JavaRDD;
 
 import java.util.ArrayList;
@@ -53,10 +54,10 @@ public class TimeSlice {
         }
     }
 
-    public static int determineRoadSlices(Trajectory trajectory) {
+    public static int determineRoadSlices(List<Integer> roadSegments) {
 
         for (int i = 0; i < rsSlices.size() -1; i++) {
-            if (trajectory.getStartingRS() >= rsSlices.get(i) &&  trajectory.getStartingRS() <= rsSlices.get(i+1)){
+            if (roadSegments.get(0) >= rsSlices.get(i) &&  roadSegments.get(0) <= rsSlices.get(i+1)){
                 return i;
 
             }

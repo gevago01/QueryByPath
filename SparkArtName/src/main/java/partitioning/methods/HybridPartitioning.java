@@ -1,10 +1,8 @@
 package partitioning.methods;
 
-import comparators.IntegerComparator;
-import comparators.LongComparator;
+import map.functions.AddTrajToTrie;
 import map.functions.CSVRecToTrajME;
 import map.functions.LineToCSVRec;
-import org.apache.hadoop.yarn.util.Times;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -12,7 +10,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.broadcast.Broadcast;
-import org.apache.spark.util.LongAccumulator;
+import org.apache.spark.util.DoubleAccumulator;
 import scala.Tuple2;
 import trie.Query;
 import trie.Trie;
@@ -27,101 +25,44 @@ import static java.util.stream.Collectors.toList;
  * Created by giannis on 17/06/19.
  */
 public class HybridPartitioning {
-    static List<TimeSlice> allSlices=new ArrayList<>();
-
-    public static List<Integer> determineTimeSlice(Trajectory trajectory) {
-        List<Integer> timeSlices = new ArrayList<>();
-        boolean foundMax = false;
-        int minIndex = -1, maxIndex = -1;
-        long startingTime=trajectory.getStartingTime();
-        long endingTime=trajectory.getEndingTime();
-
-        for (int i = 0; i < allSlices.size(); i++) {
-
-            if (startingTime >= allSlices.get(i).getLowerTime()) {
-                minIndex = i;
-            }
-
-            if (endingTime <= allSlices.get(i).getUpperTime() && !foundMax) {
-                foundMax = true;
-                maxIndex = i;
-            }
-
-        }
-
-        //make sure you don't need equal here
-        for (int i = minIndex; i <= maxIndex; i++) {
-            timeSlices.add(i);
-        }
 
 
-
-        return timeSlices;
-
-    }
-
-    private static void initializeHybridPartitioning(JavaRDD<CSVRecord> records, int nofTimeSlices, int nofRoadSlices) {
-        long minTimestamp = records.map(r -> r.getTimestamp()).min(new LongComparator());
-        long maxTimestamp = records.map(r -> r.getTimestamp()).max(new LongComparator());
-        long timeInterval = (maxTimestamp-minTimestamp) / nofTimeSlices;
-
-        TimeSlice.initializeRSIntervals(records,nofRoadSlices);
-
-        int id=0;
-
-        for (long i = minTimestamp; i < maxTimestamp; i+=timeInterval) {
-            allSlices.add(new TimeSlice(i,i+timeInterval, id++));
-        }
-
-    }
-
-    /**
-     * Returns unique slice /partition id
-     * @param trajectory
-     * @return
-     */
-    private static Integer determineSlice(final Trajectory trajectory) {
-        Random random=new Random();
-
-        List<Integer> intersectingTimeSlices = determineTimeSlice(trajectory);
-
-        //if trajectory intersects multiple time slices return one randomly
-        int timeSlice= intersectingTimeSlices.get(random.nextInt(intersectingTimeSlices.size()));
-
-        int roadSlice =TimeSlice.determineRoadSlices(trajectory);;
-
-        double cantor = 0.5 *(timeSlice+roadSlice)*(timeSlice+roadSlice +1) + roadSlice;
-        int cantorID= (int) cantor;
-
-        return cantorID;
-
-    }
 
 
 
 
     public static void main(String[] args) {
 
-        int nofTimeSlices = Integer.parseInt(args[0]);
-        int nofRoadSlices = Integer.parseInt(args[1]);
-        int bucketCapacity= Integer.parseInt(args[2]);
-//        int nofPartitions = nofRoadSlices*nofTimeSlices; // hybrid1
-        int nofPartitions = nofRoadSlices*nofTimeSlices;
 
-        String configuration =":"+nofTimeSlices+","+nofRoadSlices+","+bucketCapacity;
-        String appName = HybridPartitioning.class.getSimpleName() + (configuration);
+//        int slices = Integer.parseInt(args[1]);
 
-//        String fileName = "hdfs:////rssd.csv";
-//        String queryFile = "hdfs:////rssq.csv";
-        String fileName = "hdfs:////timeSkewedDataset.csv";
-        String queryFile = "hdfs:////timeSkewedQueries";
+        String dataHdfsName = null;
+        String queryHdfsName = null;
+        int bucketCapacity = 0;
+        if (args.length > 1) {
+            dataHdfsName = args[0];
+            queryHdfsName = args[1];
+            bucketCapacity = Integer.parseInt(args[2]);
+        }
+
+
+
+
+
+
+        String fileName = "hdfs:////"+dataHdfsName;
+        String queryFile = "hdfs:////"+queryHdfsName;
 //        String fileName = "file:///mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
 //        String queryFile = "file:///mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
-//        SparkConf conf = new SparkConf().setAppName(appName).setMaster("local[*]")
+//        String fileName = "file:////mnt/hgfs/VM_SHARED/trajDatasets/lengthSkewedDataset/80pcLS.csv";
+//        String queryFile = "file:////mnt/hgfs/VM_SHARED/trajDatasets/lengthSkewedDataset/80pcLSQueries.csv";
+//        String fileName = "file:///mnt/hgfs/VM_SHARED/trajDatasets/rssd.csv";
+//        String queryFile = "file:///mnt/hgfs/VM_SHARED/trajDatasets/concatTrajectoryQueries";
+//        SparkConf conf = new SparkConf().setMaster("local[*]")
 //                .set("spark.executor.instances", "" + Parallelism.PARALLELISM)
-//                .set("spark.driver.maxResultSize", "3G");
-                SparkConf conf = new SparkConf().
-                setAppName(appName);
+//                .set("spark.driver.maxResultSize", "3G")
+//                .setAppName(HybridPartitioning.class.getSimpleName());
+        SparkConf conf = new SparkConf().setAppName(HybridPartitioning.class.getSimpleName()+bucketCapacity);
 
 
 
@@ -129,25 +70,48 @@ public class HybridPartitioning {
 
         JavaRDD<CSVRecord> records = sc.textFile(fileName).map(new LineToCSVRec());
 
-        initializeHybridPartitioning(records, nofTimeSlices, nofRoadSlices);
+        Integer skewnessFactor = 3;
+        try {
+            String skewness = dataHdfsName.substring(0, 2);
+            skewnessFactor = Integer.parseInt(skewness);
+        }
+        catch (Exception e){
+
+        }
+        HybridConfiguration.configure(records, skewnessFactor);
+        if (args.length!=3) {
+            bucketCapacity = HybridConfiguration.getBucketCapacityLowerBound();
+        }
+
+//        int bucketCapacity = HybridConfiguration.getBucketCapacityLowerBound();
+//        int bucketCapacity = Integer.parseInt(args[2]);
+        String appName = HorizontalPartitioning.class.getSimpleName() ;
+        conf.setAppName(appName);
 
 
+        HybridPartitioner hp=new HybridPartitioner(records, HybridConfiguration.getRt_upperBound(),HybridConfiguration.getRl_upperBound(), HybridConfiguration.getRs_upperBound());
 
 
-        JavaPairRDD<Integer, Trajectory> trajectoryDataset = records.groupBy(csv -> csv.getTrajID()).mapValues(new CSVRecToTrajME());
+        DoubleAccumulator joinTimeAcc = sc.sc().doubleAccumulator("joinTimeAcc");
 
 
+        JavaPairRDD<Integer, Trajectory> trajectoryDataset = records.groupBy(csv -> csv.getTrajID()).mapValues(new CSVRecToTrajME()).mapToPair((PairFunction<Tuple2<Integer, Trajectory>, Integer, Trajectory>) tr -> new Tuple2<>(hp.determineSlice(tr._2()), tr._2()));
 
 
+        int nofTrajs = (int) trajectoryDataset.count();
+        if (bucketCapacity>nofTrajs){
+            System.err.println("bucketCapacity>nofTrajs");
+            System.exit(1);
+        }
 
-        trajectoryDataset = trajectoryDataset.mapToPair(trajectory -> {
-            Integer bucket = HybridPartitioning.determineSlice(trajectory._2());
-
-            trajectory._2().setPartitionID(bucket);
-            return new Tuple2<>(trajectory._2().getPartitionID(), trajectory._2());
-        });
-
-        /**********************hybrid2 approach**********************/
+//        trajectoryDataset = trajectoryDataset.mapToPair(trajectory -> {
+//
+//            Integer bucket = HybridPartitioning.determineSlice(trajectory._2());
+//
+//            trajectory._2().setPartitionID(bucket);
+//            return new Tuple2<>(trajectory._2().getPartitionID(), trajectory._2());
+//        });
+//        /**********************hybrid2 approach**********************/
         HashMap<Integer, Integer> buckets = Intervals.hybridSlicing(trajectoryDataset, bucketCapacity);
 
         trajectoryDataset = trajectoryDataset.mapToPair(trajectory -> {
@@ -156,22 +120,18 @@ public class HybridPartitioning {
             trajectory._2().setPartitionID(bucket);
             return new Tuple2<>(trajectory._2().getPartitionID(), trajectory._2());
         });
-        nofPartitions = Math.toIntExact(buckets.values().stream().distinct().count());
-        List<Integer> partitions = IntStream.range(0, nofPartitions).boxed().collect(toList());
-        /**********************hybrid2 approach**********************/
 
-
-        List<Tuple2<Integer, Integer>> nofTrajsList=Stats.nofTrajsOnEachNode(trajectoryDataset,sc);
-
-
-
-
-
-
-        System.out.println("nofPartitions:" + nofPartitions);
-        //uncomment this for hybrid1
+        int nofPartitions = Math.toIntExact(buckets.values().stream().distinct().count());
 //        List<Integer> partitions = IntStream.range(0, nofPartitions).boxed().collect(toList());
+//        /**********************hybrid2 approach**********************/
 
+
+        //uncomment this for hybrid1
+        List<Integer> partitions = IntStream.range(0, nofPartitions).boxed().collect(toList());
+
+//        List<Long> partitions = trajectoryDataset2.keys().distinct().collect();
+
+//        JavaRDD<Long> partitionsRDD = trajectoryDataset2.keys().distinct();
         JavaRDD<Integer> partitionsRDD = sc.parallelize(partitions);
         JavaPairRDD<Integer, Trie> emptyTrieRDD = partitionsRDD.mapToPair(new PairFunction<Integer, Integer, Trie>() {
             @Override
@@ -183,52 +143,51 @@ public class HybridPartitioning {
         });
 
 
-        JavaPairRDD<Integer, Trie> trieRDD =
-                emptyTrieRDD.groupWith(trajectoryDataset).mapValues(new Function<Tuple2<Iterable<Trie>, Iterable<Trajectory>>, Trie>() {
-                    @Override
-                    public Trie call(Tuple2<Iterable<Trie>, Iterable<Trajectory>> v1) throws Exception {
-                        Trie trie = v1._1().iterator().next();
-                        for (Trajectory trajectory : v1._2()) {
-                            trie.insertTrajectory2(trajectory);
-                        }
-                        return trie;
-                    }
-                });
+        records.unpersist(true);
+        JavaPairRDD<Integer, Trie> trieRDD = emptyTrieRDD.groupWith(trajectoryDataset).mapValues(new AddTrajToTrie());
+        long noftries = trieRDD.count();
+        trajectoryDataset.unpersist(true);
+        System.out.println("nofTries:" + noftries);
 
-        System.out.println("TrieNofPartitions:" + trieRDD.rdd().partitions().length);
 
-        long noftries=trieRDD.count();
-        System.out.println("Done. Tries build. noftries:"+noftries);
 
         JavaPairRDD<Integer, CSVRecord> queryRecords = sc.textFile(queryFile).map(new LineToCSVRec()).mapToPair(csvRec -> new Tuple2<>(csvRec.getTrajID(), csvRec));
-        JavaPairRDD<Integer, Query> queries =
-                queryRecords.groupByKey().mapValues(new CSVRecToTrajME()).map(t -> new Query(t._2())).mapToPair(q -> {
+        JavaRDD< Query> queries =
+                queryRecords.groupByKey().mapValues(new CSVRecToTrajME()).map(t -> new Query(t._2()));
 
-//                    q.setPartitionID(buckets.getOrDefault(q.getQueryID(),1));
-                    return new Tuple2<>(q.getPartitionID(), q);
-                });
-
-        Broadcast<List<Tuple2<Integer, Query>>> partBroadQueries = sc.broadcast(queries.collect());
+        Broadcast<List< Query>> partBroadQueries = sc.broadcast(queries.collect());
 
 
         JavaRDD<Set<Integer>> resultSetRDD =
                 trieRDD.map(new Function<Tuple2<Integer, Trie>, Set<Integer>>() {
+
+
                     @Override
                     public Set<Integer> call(Tuple2<Integer, Trie> v1) throws Exception {
                         Set<Integer> answer = new TreeSet<>();
 
-                        List<Tuple2<Integer, Query>> localQueries = partBroadQueries.value();
+                        List<Query> localQueries = partBroadQueries.value();
 
-                        for (Tuple2<Integer, Query> queryEntry : localQueries) {
+                        for (Query queryEntry : localQueries) {
 
+//                            int slice = determineQuerySlice(queryEntry._2());
+//                            if (queryEntry._1() == v1._2().getPartitionID()) {
+                            Set<Integer> ans=null;
                             long t1 = System.nanoTime();
-                            Set<Integer> ans = v1._2().queryIndex(queryEntry._2());
+//                            if (queryEntry.getStartingTime() >= v1._2().getMinStartingTime() && queryEntry.getStartingTime() <= v1._2().getMaxStartingTime()) {
+//                                if (queryEntry.getStartingRoadSegment() >= v1._2().getMinStartingRS() && queryEntry.getStartingRoadSegment() <= v1._2().getMaxStartingRS()) {
+//                                    if (queryEntry.getPathSegments().size() >= v1._2().getMinTrajLength() && queryEntry.getPathSegments().size() <= v1._2().getMaxTrajLength()) {
+                                        ans = v1._2().queryIndex(queryEntry);
+//                                    }
+//                                }
+//                            }
                             long t2 = System.nanoTime();
-                            if (!ans.isEmpty()){
-//                                    System.out.println("iid:"+v1._1()+","+ans.size());
+                            if (ans!=null) {
+                                answer.addAll(ans);
                             }
                             long diff = t2 - t1;
-                            answer.addAll(ans);
+                            joinTimeAcc.add(diff * Math.pow(10.0, -9.0));
+
                         }
                         return answer;
                     }
@@ -239,12 +198,12 @@ public class HybridPartitioning {
             System.out.println(t);
         }
 
-        System.out.println("resultSetSize:"+collectedResult.size());
+        joinTimeAcc.setValue(joinTimeAcc.value());
+        System.out.println("resultSetSize:" + collectedResult.size());
+        System.out.println("joinTime(sec):" + joinTimeAcc.value());
 
 
     }
-
-
 
 
 }

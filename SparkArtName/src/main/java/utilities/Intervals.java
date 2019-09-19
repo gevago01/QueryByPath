@@ -42,7 +42,7 @@ public class Intervals {
                 }).sortByKey().collect();
         HashMap<Integer, Integer> partitioning = assignTrajsToBucketsTS(groupedTrajs, bucketCapacity);
 
-//        HashMap<Integer,Integer> partitioning = assignTrajsToBucketsTS3(trajectoryDataset.collect(),bucketCapacity);
+//        HashMap<Integer,Integer> partitioning = assignTrajsToBucketsHorizontal(trajectoryDataset.collect(),bucketCapacity);
 
 
         return partitioning;
@@ -50,37 +50,82 @@ public class Intervals {
 
     }
 
-    private static HashMap<Integer, Integer> assignTrajsToBucketsTS3(List<Tuple2<Integer, Trajectory>> collect, int bucketCapacity) {
+    public static HashMap<Integer, Integer> sliceHorizontalToBuckets2(JavaPairRDD<Integer, Trajectory> trajectoryDataset, final int bucketCapacity) {
+
+
+        List<Tuple2<Integer, Iterable<Tuple2<Integer, Trajectory>>>> groupedTrajs = trajectoryDataset.
+                groupBy(new Function<Tuple2<Integer, Trajectory>, Integer>() {
+                    @Override
+                    public Integer call(Tuple2<Integer, Trajectory> v1) throws Exception {
+                        return v1._2().getRoadSegments().size();
+                    }
+                }).sortByKey().collect();
+        HashMap<Integer, Integer> partitioning = assignTrajsToBucketsHorizontal(groupedTrajs, bucketCapacity);
+
+
+        return partitioning;
+
+
+    }
+
+    private static HashMap<Integer, Integer> assignTrajsToBucketsHorizontal(List<Tuple2<Integer, Iterable<Tuple2<Integer, Trajectory>>>> groupedTrajs, int bucketCapacity) {
         HashMap<Integer, Integer> partitioning = new HashMap<>();
         int sum = 0;
         int bucketNumber = 0;
 
-        for (Tuple2<Integer, Trajectory> trajAtThisTimestamp : collect) {
+        for (Tuple2<Integer, Iterable<Tuple2<Integer, Trajectory>>> trajsAtThisTimestamp : groupedTrajs) {
 
+            for (Tuple2<Integer, Trajectory> trajectory : trajsAtThisTimestamp._2()) {
 
-            partitioning.put(trajAtThisTimestamp._2().getTrajectoryID(), bucketNumber);
-            sum++;
-            if (sum >= bucketCapacity) {
-                ++bucketNumber;
-                sum = 0;
+                partitioning.put(trajectory._2().getTrajectoryID(), bucketNumber);
+                sum++;
+                if (sum >= bucketCapacity) {
+                    ++bucketNumber;
+                    sum = 0;
+                }
             }
 
         }
 
         return partitioning;
+
     }
+
+
 
     private static HashMap<Integer, Integer> assignTrajsToBucketsTS(List<Tuple2<Long, Iterable<Tuple2<Integer, Trajectory>>>> groupedTrajs, int bucketCapacity) {
         HashMap<Integer, Integer> partitioning = new HashMap<>();
         int sum = 0;
         int bucketNumber = 0;
-        Long currentT = Long.MIN_VALUE;
 
         for (Tuple2<Long, Iterable<Tuple2<Integer, Trajectory>>> trajsAtThisTimestamp : groupedTrajs) {
 
             for (Tuple2<Integer, Trajectory> trajectory : trajsAtThisTimestamp._2()) {
 
                 partitioning.put(trajectory._2().getTrajectoryID(), bucketNumber);
+                sum++;
+                if (sum >= bucketCapacity) {
+                    ++bucketNumber;
+                    sum = 0;
+                }
+            }
+
+        }
+
+        return partitioning;
+
+    }
+
+    private static HashMap<Integer, Integer> assignTrajsToBucketsHybrid(List<Tuple2<Integer, Iterable<Trajectory>>> groupedTrajs, int bucketCapacity) {
+        HashMap<Integer, Integer> partitioning = new HashMap<>();
+        int sum = 0;
+        int bucketNumber = 0;
+
+        for (Tuple2<Integer, Iterable<Trajectory>> trajsInThisGroup : groupedTrajs) {
+
+            for (Trajectory trajectory : trajsInThisGroup._2()) {
+
+                partitioning.put(trajectory.getTrajectoryID(), bucketNumber);
                 sum++;
                 if (sum >= bucketCapacity) {
                     ++bucketNumber;
@@ -165,7 +210,7 @@ public class Intervals {
     public static HashMap<Integer, Integer> sliceRSToBuckets2(JavaPairRDD<Integer, Trajectory> trajectoryDataset, final int bucketCapacity) {
 
         List<Iterable<Tuple2<Integer, Trajectory>>> groupedTrajs = trajectoryDataset.
-                groupBy((Function<Tuple2<Integer, Trajectory>, Integer>) v1 -> v1._2().getStartingRS()).values().collect();
+                groupBy((Function<Tuple2<Integer, Trajectory>, Integer>) v1 -> v1._2().getStartingRS()).sortByKey().values().collect();
 
         HashMap<Integer, Integer> partitioning = assignTrajsToBuckets(groupedTrajs, bucketCapacity);
 
@@ -314,13 +359,8 @@ public class Intervals {
     public static HashMap<Integer, Integer> hybridSlicing(JavaPairRDD<Integer, Trajectory> trajectoryDataset, final int bucketCapacity) {
 
 
-        List<Tuple2<Integer, Iterable<Tuple2<Integer, Trajectory>>>> groupedTrajs = trajectoryDataset.
-                groupBy(new Function<Tuple2<Integer, Trajectory>, Integer>() {
-                    @Override
-                    public Integer call(Tuple2<Integer, Trajectory> v1) throws Exception {
-                        return v1._2().getPartitionID();
-                    }
-                }).collect();
+        List<Tuple2<Integer, Iterable<Trajectory>>> groupedTrajs = trajectoryDataset.groupByKey().sortByKey().collect();
+//        List<Tuple2<Integer, Iterable<Trajectory>>> groupedTrajs = trajectoryDataset.groupByKey().collect();
 
 
 //        HashMap<Integer,Integer> partitioning = assignTrajsToBuckets(groupedTrajs.iterator(),bucketCapacity);
@@ -329,29 +369,7 @@ public class Intervals {
         return partitioning;
     }
 
-    private static HashMap<Integer,Integer> assignTrajsToBucketsHybrid(List<Tuple2<Integer, Iterable<Tuple2<Integer, Trajectory>>>> groupedTrajs, int bucketCapacity) {
-        HashMap<Integer, Integer> partitioning = new HashMap<>();
-        int sum = 0;
-        int bucketNumber = 0;
 
-        for (Tuple2<Integer, Iterable<Tuple2<Integer, Trajectory>>> group :groupedTrajs) {
-
-            for (Tuple2<Integer, Trajectory> trajectory: group._2()) {
-
-                    partitioning.put(trajectory._2().getTrajectoryID(), bucketNumber);
-                    sum++;
-                    if (sum >= bucketCapacity) {
-                        ++bucketNumber;
-                        sum = 0;
-                    }
-                }
-
-        }
-
-        return partitioning;
-
-
-    }
 
     private static HashMap<Integer,Integer> assignTrajsToBuckets(Iterator<Trajectory> sortedTrajs, final int bucketCapacity) {
 
