@@ -33,16 +33,17 @@ public class TimeSlicing {
         String dataHdfsName = null;
         String queryHdfsName = null;
         int bucketCapacity = 0;
-        if (args.length > 1) {
+        if (args.length == 2) {
+            dataHdfsName = args[0];
+            queryHdfsName = args[1];
+        }
+        else if (args.length ==3) {
             dataHdfsName = args[0];
             queryHdfsName = args[1];
             bucketCapacity = Integer.parseInt(args[2]);
         }
         String fileName = "hdfs:////"+dataHdfsName;
         String queryFile = "hdfs:////"+queryHdfsName;
-
-
-
 //        String fileName = "file:////home/giannis/IdeaProjects/SparkTrajectories/SparkArtName/timeSkewedDataset.csv";
 //        String queryFile = "file:////home/giannis/IdeaProjects/SparkTrajectories/SparkArtName/timeSkewedDataset.csv";
 //        String queryFile = "file:////timeSkewedDataset";
@@ -71,19 +72,20 @@ public class TimeSlicing {
 
         JavaRDD<CSVRecord> records = sc.textFile(fileName).map(new LineToCSVRec());
 
-        Integer skewnessFactor = 3;
+        Integer skewnessFactor;
         try {
             String skewness = dataHdfsName.substring(0, 2);
             skewnessFactor = Integer.parseInt(skewness);
         }
         catch (Exception e){
-
+            skewnessFactor = 1;
         }
         HybridConfiguration.configure(records, skewnessFactor);
         if (args.length!=3) {
             bucketCapacity = HybridConfiguration.getBucketCapacityLowerBound();
         }
 
+        System.out.println("bucketCapacityIsNow:"+bucketCapacity);
 
 
         JavaPairRDD<Integer, Trajectory> trajectoryDataset = records.groupBy(csv -> csv.getTrajID()).mapValues(new CSVRecToTrajME());
@@ -104,9 +106,6 @@ public class TimeSlicing {
 
 //        Stats.nofTrajsInEachSlice(trajectoryDataset, PartitioningMethods.TIME_SLICING);
 
-        //records RDD not needed any more
-        records.unpersist(true);
-//        GroupSizes.mesaureGroupSize(trajectoryDataset, TimeSlicing.class.getName());
 
 
         int nofBuckets = Math.toIntExact(buckets.values().stream().distinct().count());
@@ -144,10 +143,8 @@ public class TimeSlicing {
 //            System.exit(1);
 //        }
 
-        records.unpersist(true);
         JavaPairRDD<Integer, Trie> trieRDD = emptyTrieRDD.groupWith(trajectoryDataset).mapValues(new AddTrajToTrie());
         long noftries = trieRDD.count();
-        trajectoryDataset.unpersist(true);
         System.out.println("nofTries:" + noftries);
 
 
@@ -160,18 +157,37 @@ public class TimeSlicing {
                 });
 //        Broadcast<Map<Integer, Query>> broadcastedQueries = sc.broadcast(queries.collectAsMap());
         System.out.println("nofQueries:" + queries.count());
-//        Stats.nofQueriesInSlice(queries, PartitioningMethods.TIME_SLICING);
 
-
-        System.out.println("TrieNofPartitions:" + trieRDD.rdd().partitions().length);
-//        Stats.nofQueriesOnEachNode(queries, PartitioningMethods.TIME_SLICING);
-//        Stats.nofQueriesInSlice(queries);
-//        Stats.nofTriesInPartitions(trieRDD);
         Broadcast<List<Tuple2<Integer, Query>>> partBroadQueries = sc.broadcast(queries.collect());
 
 
         JavaRDD<Set<Integer>> resultSetRDD =
-              trieRDD.map(new QueryMap(partBroadQueries, joinTimeAcc)).filter(set -> set.isEmpty() ? false : true);
+              trieRDD.map(new Function<Tuple2<Integer, Trie>, Set<Integer>>() {
+                  @Override
+                  public Set<Integer> call(Tuple2<Integer, Trie> v1) throws Exception {
+                      List<Tuple2<Integer, Query>> localQueries = partBroadQueries.value();
+                      Set<Integer> answer = new TreeSet<>();
+
+                      for (Tuple2<Integer, Query> queryEntry : localQueries) {
+
+                          Set<Integer> ans = null;
+                          long t1 = System.nanoTime();
+//            if (queryEntry._2().getStartingRoadSegment() >= v1._2().getMinStartingRS() && queryEntry._2().getStartingRoadSegment() <= v1._2().getMaxStartingRS()) {
+                          if (queryEntry._2().getStartingTime() >= v1._2().getMinStartingTime() && queryEntry._2().getStartingTime() <= v1._2().getMaxStartingTime()) {
+                              ans = v1._2().queryIndex(queryEntry._2());
+                          }
+//            }
+                          if (ans!=null) {
+                              answer.addAll(ans);
+                          }
+
+                          long t2 = System.nanoTime();
+                          long diff = t2 - t1;
+                          joinTimeAcc.add(diff * Math.pow(10.0, -9.0));
+                      }
+                      return answer;
+                  }
+              }).filter(set -> set.isEmpty() ? false : true);
         List<Integer> collectedResult = resultSetRDD.collect().stream().flatMap(set -> set.stream()).distinct().collect(toList());
 
         for (Integer t : collectedResult) {

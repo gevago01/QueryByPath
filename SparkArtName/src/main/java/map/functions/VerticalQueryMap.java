@@ -32,9 +32,9 @@ public class VerticalQueryMap implements Function<Tuple2<Integer, Trie>, Set<Int
 
             Set<Integer> ans = null;
             long t1 = System.nanoTime();
-//            if (queryEntry._2().getStartingRoadSegment() >= v1._2().getMinStartingRS() && queryEntry._2().getStartingRoadSegment() <= v1._2().getMaxStartingRS()) {
+            if (queryEntry._2().getStartingRoadSegment() >= v1._2().getMinStartingRS() && queryEntry._2().getStartingRoadSegment() <= v1._2().getMaxStartingRS()) {
                     ans = v1._2().queryIndex(queryEntry._2());
-//            }
+            }
             long t2 = System.nanoTime();
             if (ans!=null) {
                 answer.addAll(ans);

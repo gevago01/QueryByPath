@@ -33,14 +33,15 @@ public class QueryMap  implements Function<Tuple2<Integer, Trie>, Set<Integer>> 
             Set<Integer> ans = null;
             long t1 = System.nanoTime();
 //            if (queryEntry._2().getStartingRoadSegment() >= v1._2().getMinStartingRS() && queryEntry._2().getStartingRoadSegment() <= v1._2().getMaxStartingRS()) {
-//                if (queryEntry._2().getStartingTime() >= v1._2().getMinStartingTime() && queryEntry._2().getStartingTime() <= v1._2().getMaxStartingTime()) {
+                if (queryEntry._2().getStartingTime() >= v1._2().getMinStartingTime() && queryEntry._2().getStartingTime() <= v1._2().getMaxStartingTime()) {
                     ans = v1._2().queryIndex(queryEntry._2());
-//                }
+                }
 //            }
-            long t2 = System.nanoTime();
             if (ans!=null) {
                 answer.addAll(ans);
             }
+
+            long t2 = System.nanoTime();
             long diff = t2 - t1;
             joinTimeAcc.add(diff * Math.pow(10.0, -9.0));
         }

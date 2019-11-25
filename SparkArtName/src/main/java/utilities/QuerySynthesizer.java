@@ -1,6 +1,7 @@
 package utilities;
 
 import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
 import scala.Tuple2;
 
 import java.io.BufferedWriter;
@@ -15,8 +16,10 @@ import java.util.List;
 public class QuerySynthesizer implements Serializable {
 
 
-    public static void synthesize(JavaPairRDD<Integer, Iterable<CSVRecord>> recordsCached) {
-        JavaPairRDD<Integer, Iterable<CSVRecord>> recordSample = recordsCached.sample(false, 0.0147);
+    public static void synthesize(JavaRDD<CSVRecord> records) {
+        JavaPairRDD<Integer, Iterable<CSVRecord>> recordsCached = records.groupBy(csv -> csv.getTrajID()).cache();
+//        JavaPairRDD<Integer, Iterable<CSVRecord>> recordSample = recordsCached.sample(false, 0.0147);
+        JavaPairRDD<Integer, Iterable<CSVRecord>> recordSample = recordsCached.sample(false, 0.04167);
         List<Tuple2<Integer, Iterable<CSVRecord>>> allRecords = recordSample.collect();
 
         System.out.println("recordSample.count():" + recordSample.groupByKey().keys().count());

@@ -13,6 +13,7 @@ public class Trajectory implements Serializable, Comparable<Trajectory> {
     public int trajectoryID;
     private int partitionID;
     public IntArrayList roadSegments = new IntArrayList();
+//    ShortArrayLi
     public LongArrayList timestamps = new LongArrayList();
     private long hilbertValue;
 

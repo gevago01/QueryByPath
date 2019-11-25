@@ -39,7 +39,11 @@ public class HybridPartitioning {
         String dataHdfsName = null;
         String queryHdfsName = null;
         int bucketCapacity = 0;
-        if (args.length > 1) {
+        if (args.length == 2) {
+            dataHdfsName = args[0];
+            queryHdfsName = args[1];
+        }
+        else if (args.length ==3) {
             dataHdfsName = args[0];
             queryHdfsName = args[1];
             bucketCapacity = Integer.parseInt(args[2]);
@@ -70,13 +74,13 @@ public class HybridPartitioning {
 
         JavaRDD<CSVRecord> records = sc.textFile(fileName).map(new LineToCSVRec());
 
-        Integer skewnessFactor = 3;
+        Integer skewnessFactor;
         try {
             String skewness = dataHdfsName.substring(0, 2);
             skewnessFactor = Integer.parseInt(skewness);
         }
         catch (Exception e){
-
+            skewnessFactor = 1;
         }
         HybridConfiguration.configure(records, skewnessFactor);
         if (args.length!=3) {
@@ -122,7 +126,6 @@ public class HybridPartitioning {
         });
 
         int nofPartitions = Math.toIntExact(buckets.values().stream().distinct().count());
-//        List<Integer> partitions = IntStream.range(0, nofPartitions).boxed().collect(toList());
 //        /**********************hybrid2 approach**********************/
 
 
@@ -143,10 +146,8 @@ public class HybridPartitioning {
         });
 
 
-        records.unpersist(true);
         JavaPairRDD<Integer, Trie> trieRDD = emptyTrieRDD.groupWith(trajectoryDataset).mapValues(new AddTrajToTrie());
         long noftries = trieRDD.count();
-        trajectoryDataset.unpersist(true);
         System.out.println("nofTries:" + noftries);
 
 
@@ -174,12 +175,12 @@ public class HybridPartitioning {
 //                            if (queryEntry._1() == v1._2().getPartitionID()) {
                             Set<Integer> ans=null;
                             long t1 = System.nanoTime();
-//                            if (queryEntry.getStartingTime() >= v1._2().getMinStartingTime() && queryEntry.getStartingTime() <= v1._2().getMaxStartingTime()) {
-//                                if (queryEntry.getStartingRoadSegment() >= v1._2().getMinStartingRS() && queryEntry.getStartingRoadSegment() <= v1._2().getMaxStartingRS()) {
+                            if (queryEntry.getStartingTime() >= v1._2().getMinStartingTime() && queryEntry.getStartingTime() <= v1._2().getMaxStartingTime()) {
+                                if (queryEntry.getStartingRoadSegment() >= v1._2().getMinStartingRS() && queryEntry.getStartingRoadSegment() <= v1._2().getMaxStartingRS()) {
 //                                    if (queryEntry.getPathSegments().size() >= v1._2().getMinTrajLength() && queryEntry.getPathSegments().size() <= v1._2().getMaxTrajLength()) {
                                         ans = v1._2().queryIndex(queryEntry);
-//                                    }
-//                                }
+                                    }
+                                }
 //                            }
                             long t2 = System.nanoTime();
                             if (ans!=null) {

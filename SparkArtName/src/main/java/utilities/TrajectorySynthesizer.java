@@ -1,10 +1,14 @@
 package utilities;
 
+import com.google.common.collect.Iterables;
 import comparators.IntegerComparator;
+import comparators.LongComparator;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import map.functions.CSVRecordToTrajectory;
 import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
 
+import javax.xml.bind.SchemaOutputResolver;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -26,30 +30,75 @@ public class TrajectorySynthesizer {
 
     private final static int DUPLICATION_FACTOR = 1;
     public final static int PROBABILITY = 20;
+    public final static int DATASET_SIZE = 8000000;
+    private final int avgLen;
+    private final int medianLen;
+    private int sumLen;
     private  int minRS;
     private  int maxRS;
+    private  int minLen;
+    private  int maxLen;
     private long minTimestamp;
     private long maxTimestamp;
     private long maxTrajectoryID;
     private List<Trajectory> trajectories;
 
-    public TrajectorySynthesizer(JavaPairRDD<Integer, Iterable<CSVRecord>> recordsCached, Long minTimestamp, Long maxTimestamp, Integer trajectoryID, int minRS, Integer maxRS) {
+    public TrajectorySynthesizer(JavaRDD<CSVRecord> records) {
 
+        JavaPairRDD<Integer, Iterable<CSVRecord>> recordsCached = records.groupBy(csv -> csv.getTrajID()).cache();
         trajectories = recordsCached.mapValues(new CSVRecordToTrajectory()).values().collect();
 
-        this.minTimestamp = minTimestamp;
-        this.maxTimestamp = maxTimestamp;
+        this.minTimestamp = records.map(r -> r.getTimestamp()).min(new LongComparator());
+        this.maxTimestamp = records.map(r -> r.getTimestamp()).max(new LongComparator());
 
 
-        this.minRS=minRS;
-        this.maxRS=maxRS;
+        this.minRS=records.map(r -> r.getRoadSegment()).min(new IntegerComparator());
+        this.maxRS=records.map(r -> r.getRoadSegment()).max(new IntegerComparator());
 
 
-        this.maxTrajectoryID = maxTrajectoryID;
+        this.minLen = recordsCached.map(r -> Iterables.size(r._2())).min(new IntegerComparator());
+        this.maxLen = recordsCached.map(r -> Iterables.size(r._2())).max(new IntegerComparator());
+        this.sumLen = recordsCached.map(r -> Iterables.size(r._2())).reduce((l1,l2) -> l1+l2);
+
+        this.avgLen = sumLen/trajectories.size();
+
+        this.medianLen = (this.avgLen+this.minLen)/2;
+        this.maxTrajectoryID = records.map(r -> r.getTrajID()).max(new IntegerComparator());
 
     }
 
     public void synthesize() throws IOException {
+        BufferedWriter bf = new BufferedWriter(new FileWriter(new File("objects"+DATASET_SIZE+"_synthDataset.csv")));
+
+        for (int i = 0; i < DATASET_SIZE; i++) {
+
+            if (i>=trajectories.size()){
+
+                ++maxTrajectoryID;
+                long timestamp = ThreadLocalRandom.current().nextLong(minTimestamp, maxTimestamp);
+                long randomSize=ThreadLocalRandom.current().nextLong(minLen, medianLen);
+
+                for (long j = 0; j < randomSize; j++) {
+                    bf.write(maxTrajectoryID + ", " + timestamp + ", " + ThreadLocalRandom.current().nextLong(minRS, maxRS) + "\n");
+                    timestamp = timestamp + 5;
+                }
+            }
+            else{
+
+                writeTrajectory(trajectories.get(i), bf);
+            }
+
+            if ((i%1000000)==0) {
+                System.out.println("flushed1million");
+                bf.flush();
+            }
+
+        }
+
+        bf.close();
+    }
+
+    public void duplicate() throws IOException {
         BufferedWriter bf = new BufferedWriter(new FileWriter(new File("synthDataset.csv")));
 
         for (Trajectory t : trajectories) {

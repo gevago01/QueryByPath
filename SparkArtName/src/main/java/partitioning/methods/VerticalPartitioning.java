@@ -1,15 +1,16 @@
 package partitioning.methods;
 
-import map.functions.*;
+import map.functions.AddTrajToTrie;
+import map.functions.CSVRecToTrajME;
+import map.functions.LineToCSVRec;
+import map.functions.VerticalQueryMap;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.util.DoubleAccumulator;
-import org.apache.spark.util.LongAccumulator;
 import scala.Tuple2;
 import trie.Query;
 import trie.Trie;
@@ -18,7 +19,6 @@ import utilities.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.IntStream;
 
 import static java.util.stream.Collectors.toList;
@@ -35,48 +35,46 @@ public class VerticalPartitioning {
         String dataHdfsName = null;
         String queryHdfsName = null;
         int bucketCapacity = 0;
-        if (args.length > 1) {
+
+        if (args.length == 2) {
+            dataHdfsName = args[0];
+            queryHdfsName = args[1];
+        } else if (args.length == 3) {
             dataHdfsName = args[0];
             queryHdfsName = args[1];
             bucketCapacity = Integer.parseInt(args[2]);
         }
-        String fileName = "hdfs:////"+dataHdfsName;
-        String queryFile = "hdfs:////"+queryHdfsName;
-//        String queryFile = "file:////mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
-//        String fileName = "file:////mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
+//        String fileName = "hdfs:////" + dataHdfsName;
+//        String queryFile = "hdfs:////" + queryHdfsName;
+        String queryFile = "file:////mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
+        String fileName = "file:////mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
 //        String fileName = "file:///mnt/hgfs/VM_SHARED/samplePort.csv";
 
 //        String queryFile = "file:///mnt/hgfs/VM_SHARED/trajDatasets/queryRecords.csv";
 //        String queryFile = "file:////data/queryRecords.csv";
 
-//        SparkConf conf = new SparkConf()
-//                .setMaster("local[*]")
-//                .set("spark.executor.instances", "" + Parallelism.PARALLELISM)
-//                .setAppName(VerticalPartitioning.class.getSimpleName());
-        SparkConf conf = new SparkConf().setAppName(VerticalPartitioning.class.getSimpleName()+bucketCapacity);
+        SparkConf conf = new SparkConf()
+                .setMaster("local[*]")
+                .set("spark.executor.instances", "" + Parallelism.PARALLELISM)
+                .setAppName(VerticalPartitioning.class.getSimpleName());
+//        SparkConf conf = new SparkConf().setAppName(VerticalPartitioning.class.getSimpleName() + bucketCapacity);
 
         JavaSparkContext sc = new JavaSparkContext(conf);
         JavaRDD<CSVRecord> records = sc.textFile(fileName).map(new LineToCSVRec());
         DoubleAccumulator joinTimeAcc = sc.sc().doubleAccumulator("joinTimeAcc");
 
-        Integer skewnessFactor = 3;
+        Integer skewnessFactor;
         try {
             String skewness = dataHdfsName.substring(0, 2);
             skewnessFactor = Integer.parseInt(skewness);
-        }
-        catch (Exception e){
+        } catch (Exception e) {
+            skewnessFactor = 1;
 
         }
-        HybridConfiguration.configure(records,skewnessFactor);
-        if (args.length!=3) {
-        bucketCapacity = HybridConfiguration.getBucketCapacityLowerBound();
+        HybridConfiguration.configure(records, skewnessFactor);
+        if (args.length != 3) {
+            bucketCapacity = HybridConfiguration.getBucketCapacityLowerBound();
         }
-
-
-//        String appName = HorizontalPartitioning.class.getSimpleName() + bucketCapacity;
-//        conf.setAppName(appName);
-
-
 
 
         JavaPairRDD<Integer, CSVRecord> queryRecords = sc.textFile(queryFile, Parallelism.PARALLELISM).map(new LineToCSVRec()).mapToPair(csvRec -> new Tuple2<>(csvRec.getTrajID(), csvRec));
@@ -85,7 +83,7 @@ public class VerticalPartitioning {
         JavaPairRDD<Integer, Trajectory> trajectoryDataset = records.groupBy(csv -> csv.getTrajID()).mapValues(new CSVRecToTrajME());
 
         int nofTrajs = (int) trajectoryDataset.count();
-        if (bucketCapacity>nofTrajs){
+        if (bucketCapacity > nofTrajs) {
             System.err.println("bucketCapacity>nofTrajs");
             System.exit(1);
         }
@@ -140,13 +138,9 @@ public class VerticalPartitioning {
 
 //        Stats.nofQueriesOnEachNode(queries, PartitioningMethods.VERTICAL);
 
-        records.unpersist(true);
         JavaPairRDD<Integer, Trie> trieRDD = emptyTrieRDD.groupWith(trajectoryDataset).mapValues(new AddTrajToTrie());
         long noftries = trieRDD.count();
-        trajectoryDataset.unpersist(true);
         System.out.println("nofTries:" + noftries);
-
-
 
 
         Broadcast<List<Tuple2<Integer, Query>>> partBroadQueries = sc.broadcast(queries.collect());
