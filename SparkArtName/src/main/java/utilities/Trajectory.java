@@ -15,7 +15,6 @@ public class Trajectory implements Serializable, Comparable<Trajectory> {
     public IntArrayList roadSegments = new IntArrayList();
 //    ShortArrayLi
     public LongArrayList timestamps = new LongArrayList();
-    private long hilbertValue;
 
     public LongArrayList getTimestamps() {
         return timestamps;
@@ -44,13 +43,8 @@ public class Trajectory implements Serializable, Comparable<Trajectory> {
     }
 
 
-    public long getHilbertValue() {
-        return hilbertValue;
-    }
 
-    public void setHilbertValue(long hilbertValue) {
-        this.hilbertValue = hilbertValue;
-    }
+
 
     public void addRoadSegment(int roadSegment) {
 //        roadSegments.add(roadSegment.intern());

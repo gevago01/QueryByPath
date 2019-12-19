@@ -12,6 +12,7 @@ public class AddTrajToTrie implements Function<Tuple2<Iterable<Trie>, Iterable<T
     @Override
     public Trie call(Tuple2<Iterable<Trie>, Iterable<Trajectory>> v1) throws Exception {
         Trie trie = v1._1().iterator().next();
+
         for (Trajectory trajectory : v1._2()) {
             trie.insertTrajectory2(trajectory);
         }

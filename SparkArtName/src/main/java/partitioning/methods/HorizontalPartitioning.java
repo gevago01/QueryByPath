@@ -1,8 +1,6 @@
 package partitioning.methods;
 
-import map.functions.AddTrajToTrie;
-import map.functions.CSVRecToTrajME;
-import map.functions.LineToCSVRec;
+import map.functions.*;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -16,7 +14,6 @@ import trie.Query;
 import trie.Trie;
 import utilities.*;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.IntStream;
 
@@ -88,7 +85,6 @@ public class HorizontalPartitioning {
         }
 
 
-
 //        System.exit(1);
 //        QuerySynthesizer.synthesize(records);
 //        System.exit(1);
@@ -105,7 +101,9 @@ public class HorizontalPartitioning {
 //        System.exit(1);
 
 
+//        JavaPairRDD<Integer, Trajectory> trajectoryDataset = records.groupBy(csv -> csv.getTrajID()).mapValues(new CSVRecToAllSubTrajs()).flatMapValues(it -> it).mapValues(new CSVRecToTrajME());
         JavaPairRDD<Integer, Trajectory> trajectoryDataset = records.groupBy(csv -> csv.getTrajID()).mapValues(new CSVRecToTrajME());
+//                mapValues(new CSVRecToTrajME());
 //        trajectoryDataset.collect();
 //        Tuple2<Integer, Integer> busiestRS=trajectoryDataset.mapToPair(new PairFunction<Tuple2<Integer,Trajectory>, Integer, Integer>() {
 //            @Override
@@ -178,7 +176,6 @@ public class HorizontalPartitioning {
 
 
         Broadcast<List<Tuple2<Integer, Query>>> partBroadQueries = sc.broadcast(queries.collect());
-
 
 
         JavaRDD<HorizontalAnswer> resultSet =

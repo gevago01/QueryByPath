@@ -42,26 +42,27 @@ public class TimeSlicing {
             queryHdfsName = args[1];
             bucketCapacity = Integer.parseInt(args[2]);
         }
-        String fileName = "hdfs:////"+dataHdfsName;
-        String queryFile = "hdfs:////"+queryHdfsName;
+//        String fileName = "hdfs:////"+dataHdfsName;
+//        String queryFile = "hdfs:////"+queryHdfsName;
 //        String fileName = "file:////home/giannis/IdeaProjects/SparkTrajectories/SparkArtName/timeSkewedDataset.csv";
 //        String queryFile = "file:////home/giannis/IdeaProjects/SparkTrajectories/SparkArtName/timeSkewedDataset.csv";
 //        String queryFile = "file:////timeSkewedDataset";
 
 //        String fileName = "file:///mnt/hgfs/VM_SHARED/trajDatasets/concatTrajectoryDataset.csv";
 //        String queryFile = "file:///mnt/hgfs/VM_SHARED/trajDatasets/concatTrajectoryDataset.csv";
-//        String fileName = "file:///mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
-//        String queryFile = "file:///mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
+        String fileName = "file:///mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
+        String queryFile = "file:///mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
+
 //        String queryFile = "file:///mnt/hgfs/VM_SHARED/trajDatasets/queryRecords.csv";
 
 
 
 
-//        SparkConf conf = new SparkConf().setMaster("local[*]")
-//                .set("spark.executor.instances", "" + Parallelism.PARALLELISM)
-//                .set("spark.driver.maxResultSize", "3G")
-//                .setAppName(TimeSlicing.class.getSimpleName());
-        SparkConf conf = new SparkConf().setAppName(TimeSlicing.class.getSimpleName()+bucketCapacity);
+        SparkConf conf = new SparkConf().setMaster("local[*]")
+                .set("spark.executor.instances", "" + Parallelism.PARALLELISM)
+                .set("spark.driver.maxResultSize", "3G")
+                .setAppName(TimeSlicing.class.getSimpleName());
+//        SparkConf conf = new SparkConf().setAppName(TimeSlicing.class.getSimpleName()+bucketCapacity);
 
 
         JavaSparkContext sc = new JavaSparkContext(conf);
