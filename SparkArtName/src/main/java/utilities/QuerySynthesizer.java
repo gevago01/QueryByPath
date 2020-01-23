@@ -19,7 +19,7 @@ public class QuerySynthesizer implements Serializable {
     public static void synthesize(JavaRDD<CSVRecord> records) {
         JavaPairRDD<Integer, Iterable<CSVRecord>> recordsCached = records.groupBy(csv -> csv.getTrajID()).cache();
 //        JavaPairRDD<Integer, Iterable<CSVRecord>> recordSample = recordsCached.sample(false, 0.0147);
-        JavaPairRDD<Integer, Iterable<CSVRecord>> recordSample = recordsCached.sample(false, 0.04167);
+        JavaPairRDD<Integer, Iterable<CSVRecord>> recordSample = recordsCached.sample(false, 0.028);
         List<Tuple2<Integer, Iterable<CSVRecord>>> allRecords = recordSample.collect();
 
         System.out.println("recordSample.count():" + recordSample.groupByKey().keys().count());

@@ -1,31 +1,22 @@
 package trie;
 
 
+import comparators.IntegerComparator;
+import comparators.LongComparator;
 import utilities.Trajectory;
 
 import java.io.Serializable;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 public class Trie implements Serializable {
     private Node root = Node.getNode(Integer.MAX_VALUE);
 
-    public long getMinTrajLength() {
-        return minTrajLength;
-    }
+    private long minTrajLength = Long.MAX_VALUE;
+    private long maxTrajLength = Long.MIN_VALUE;
 
-    public long getMaxTrajLength() {
-        return maxTrajLength;
-    }
-
-    private long minTrajLength=Long.MAX_VALUE;
-    private long maxTrajLength=Long.MIN_VALUE;
-
-    private long minStartingTime=Long.MAX_VALUE;
-    private long maxStartingTime=Long.MIN_VALUE;
-    private int minStartingRS=Integer.MAX_VALUE;
+    private long minStartingTime = Long.MAX_VALUE;
+    private long maxStartingTime = Long.MIN_VALUE;
+    private int minStartingRS = Integer.MAX_VALUE;
 
     public int getMinStartingRS() {
         return minStartingRS;
@@ -35,13 +26,8 @@ public class Trie implements Serializable {
         return maxStartingRS;
     }
 
-    private int maxStartingRS=Integer.MIN_VALUE;
+    private int maxStartingRS = Integer.MIN_VALUE;
 
-    public long getHilbertValue() {
-        return hilbertValue;
-    }
-
-    private long hilbertValue;
 
     public long getMinStartingTime() {
         return minStartingTime;
@@ -52,299 +38,184 @@ public class Trie implements Serializable {
     }
 
 
-
-
-
-
-
-
-
-    public int getPartitionID() {
-        return partitionID;
-    }
-
     public int partitionID;
-    private int horizontalTrieID;
-
-    public int getTrajectoryCounter() {
-        return trajectoryCounter;
-    }
-
-    private int trajectoryCounter = 0;
-
-
     public void setPartitionID(Integer partition) {
         this.partitionID = partition;
     }
 
-    public int getHorizontalTrieID() {
-        return horizontalTrieID;
-    }
 
-
-    public Node getRoot() {
-        return root;
-    }
-
-    public void insertTrajectory2(List<Integer> roadSegments, int trajectoryID, long startingTime, long endingTime) {
-        Node currentNode=root, child = root;
+    public void insertTrajectory2(List<Integer> roadSegments, int trajectoryID, List<Long> times) {
+        Node currentNode = root, child = root;
         int previousRoadSegment = -1;
+
 
         for (int i = 0; i < roadSegments.size(); i++) {
             int roadSegment = roadSegments.get(i);
             if (roadSegment == previousRoadSegment) {
+                child.addStartingTime(times.get(i), trajectoryID);
                 continue;
             }
             currentNode = child;
-// when i==0 currentNode = child = root
-            child = currentNode.getChildren(roadSegment);
+            ArrayList<Node> currentNodeList = currentNode.getChildren(roadSegment);
+            if (currentNodeList==null){
+                child=null;
+            }
+            else{
+                child = currentNode.getChildren(roadSegment).get(new Random().nextInt(currentNodeList.size()));
+            }
+
 
             if (child == null) {
                 child = currentNode.addChild(roadSegment);
-
+                root.addToRoot(roadSegment, child);
             }
+
+            child.addStartingTime(times.get(i), trajectoryID);
 
             previousRoadSegment = roadSegment;
         }
-//        child.addTrajectory(endingTime, trajectoryID);
-        child.addStartingTime(startingTime,trajectoryID);
-        child.addEndingTime(endingTime,trajectoryID);
-
-
     }
 
 
-//    public void insertTrajectory2(List<Integer> roadSegments, int trajectoryID, long startingTime, long endingTime) {
-//        Node currentNode, child = root;
-//        int previousRoadSegment = -1;
-//
-//        for (int i = 0; i < roadSegments.size(); i++) {
-//            int roadSegment = roadSegments.get(i);
-//            if (roadSegment == previousRoadSegment) {
-//                continue;
-//            }
-//            currentNode = child;
-//// when i==0 currentNode = child = root
-//            child = currentNode.getChildren(roadSegment);
-//
-//            if (child == null) {
-//                child = currentNode.addChild(roadSegment);
-//
-//            }
-//
-//            previousRoadSegment = roadSegment;
-//        }
-////        child.addTrajectory(endingTime, trajectoryID);
-//        child.addStartingTime(startingTime,trajectoryID);
-//        child.addEndingTime(endingTime,trajectoryID);
-//
-//
-//    }
-//  less memory efficient of insert, inserts all timestamps to the index
-//    public void insertTrajectory(List<String> roadSegments, long trajectoryID, List<Long> timestamps) {
-//        Node currentNode , child = root;
-//        String previousRoadSegment = null;
-//
-//        if (roadSegments.isEmpty() || timestamps.isEmpty()){
-//            System.err.println("lists are empty");;
-//            System.exit(-1);
-//        }
-//
-//        assert (timestamps.size() == roadSegments.size());
-//
-//        if (startingRoadSegment.isEmpty()) {
-//            //this is only used for vertical partitioning
-//            startingRoadSegment = roadSegments.get(0);
-//        }
-//
-//        if (roadSegments.size()>max){
-//            max=roadSegments.size();
-//        }
-//        for (int i = 0; i < roadSegments.size(); i++) {
-//            String roadSegment = roadSegments.get(i).intern();
-//            if (roadSegment.equals(previousRoadSegment)) {
-//                assert (child != null);
-//                child.addTrajectory(timestamps.get(i), trajectoryID);
-//                ++max;
-//                continue;
-//            }
-//            currentNode = child;
-//
-//            Map<String, Node> nodeChildren = currentNode.getChildren();
-//            child = nodeChildren.get(roadSegment);
-//
-//            if (child == null) {
-//                child = currentNode.addChild(roadSegment);
-//            }
-//
-//            child.addTrajectory(timestamps.get(i), trajectoryID);
-//
-//            previousRoadSegment = roadSegment;
-//            ++max;
-//
-//        }
-//
-//    }
-
-
-    /**
-     * This method does not answer strict path queries
-     * If query is ABCD, it returns trajectories that have only passed through AB for example
-     *
-     * @param q
-     * @return
-     */
     public Set<Integer> queryIndex(Query q) {
 
-        Node currentNode = root;
+        int level=0;
+        return queryNode2(root,q,q.getStartingTime(),q.getEndingTime(),level);
+//        return queryNode(root,q.getStartingRoadSegment(),q.getStartingTime(),q.getEndingTime());
+    }
+
+    public Set<Integer> queryNode2(Node n, Query query, long startingTime, long endingTime, int level) {
+
         Set<Integer> answer = new TreeSet<>();
 
-        for (int i = 0; i < q.getPathSegments().size(); i++) {
-
-            int roadSegment = q.getPathSegments().get(i);
-
-
-            if (currentNode.getRoadSegment() == roadSegment) {
-                //stay on this node, query roadSegment is repeated
-                continue;
-            }
-            Node child = currentNode.getChildren(roadSegment);
-
-            if (child == null) {
-                //no matching result
-                break;
-            } else {
-                //filter time here
-                answer.addAll(child.getTrajectories(q.getStartingTime(), (q.getEndingTime() + 1)));
-                currentNode = child;
-            }
+        if (n.getRoadSegment()!=query.getPathSegments().get(level)){
+            System.err.println("wtf");
+            System.exit(1);
         }
+        Queue<Node> queue = new LinkedList<>();
+        answer.addAll(n.getTrajectories(startingTime, endingTime+1));
+        if (level>=query.getPathSegments().size()){
+            return answer;
+        }
+        ArrayList<Node> nodesChildren =n.getChildren(query.getPathSegments().get(level));
+        if (nodesChildren==null){
+//            return answer;
+            nodesChildren=new ArrayList<Node>();
+        }
+        queue.addAll(nodesChildren);
 
+
+        while (!queue.isEmpty()){
+            Node peekedNode = queue.poll();
+            answer.addAll(queryNode2(peekedNode,query, startingTime,endingTime,level+1));
+        }
         return answer;
     }
 
-    public double avgIndexDepth() {
+    public Set<Integer> queryNode(Node n, Integer currentRoadSegment, long startingTime, long endingTime) {
 
-        Node currentNode = root;
+        Set<Integer> answer = new TreeSet<>();
 
-        LinkedList<Node> queue = new LinkedList<>();
-        queue.push(currentNode);
-
-        int depth = 0;
-        int counter = 0;
-        int sum = 0;
-
-        while (!queue.isEmpty()) {
-
-            currentNode = queue.pop();
-            List<Node> allChildren = currentNode.getAllChildren();
-
-            if (allChildren.isEmpty()) {
-                sum += depth;
-                ++counter;
-                depth = 0;
-            }
-            ++depth;
-
-            queue.addAll(allChildren);
-
+        Queue<Node> queue = new LinkedList<>();
+        answer.addAll(n.getTrajectories(startingTime, endingTime+1));
+        ArrayList<Node> nodesChildren =n.getChildren(currentRoadSegment);
+        if (nodesChildren==null){
+            return answer;
         }
-
-        double avgBranchDepth = (double) sum / counter;
-
-        return avgBranchDepth;
-
-//        System.exit(1);
-    }
+        queue.addAll(nodesChildren);
 
 
-    public double avgIndexWidth() {
-
-        Node currentNode = root;
-
-        LinkedList<Node> queue = new LinkedList<>();
-        queue.add(currentNode);
-
-        int counter = 0;
-        int sum = 0;
-
-        while (!queue.isEmpty()) {
-
-            currentNode = queue.remove();
-            List<Node> allChildren = currentNode.getAllChildren();
-
-            sum += currentNode.getAllChildren2().size();
-            ++counter;
-
-            queue.addAll(allChildren);
-
+        while (!queue.isEmpty()){
+            Node peekedNode = queue.poll();
+            answer.addAll(queryNode(peekedNode,peekedNode.getRoadSegment(), startingTime,endingTime));
         }
-
-        double avgBranchWidth = (double) sum / counter;
-
-        return avgBranchWidth;
-
-//        System.exit(1);
+        return answer;
     }
 
+//    public Set<Integer> queryIndex(Query q) {
+//
+//        Node currentNode = root;
+//        Set<Integer> answer = new TreeSet<>();
+//
+////        Queue<Node> queue = new LinkedList<>();
+////
+////        queue.addAll(root.getChildren(q.getStartingRoadSegment()));
+////
+////        while (!queue.isEmpty()) {
+////
+////        }
+//        List<Node> allasd=root.getAllChildren();
+//
+////        for (Node n:allasd) {
+////            System.out.println("::"+n.getRoadSegment());
+////        }
+////        System.exit(1);
+//
+//        for (int i = 0; i < q.getPathSegments().size(); i++) {
+//
+//            int roadSegment = q.getPathSegments().get(i);
+//
+//
+//            if (currentNode.getRoadSegment() == roadSegment) {
+//                //stay on this node, query roadSegment is repeated
+//                continue;
+//            }
+//            ArrayList<Node> allChildren = currentNode.getChildren(roadSegment);
+//            if (allChildren == null) {
+//                //no matching result
+//                break;
+//            } else {
+//                for (Node child : allChildren) {
+//                    Collection<Integer> tids = child.getTrajectories(q.getStartingTime(), (q.getEndingTime() + 1));
+//                    if (!tids.isEmpty()) {
+//                        currentNode = child;
+//                        //filter time here
+//                        answer.addAll(tids);
+//                    }
+//                }
+//
+////
+//            }
+//        }
+//
+//        return answer;
+//    }
 
-    public void setHorizontalTrieID(int horizontalTrieID) {
-        this.horizontalTrieID = horizontalTrieID;
-    }
-
-    @Override
-    public String toString() {
-        return "TriePrint{" +
-                "root=" + root.getRoadSegment() +
-                ", horizontalTrieID=" + horizontalTrieID +
-                '}';
-    }
-
-    public  void callthis(){
-        System.out.println("nof children:"+getRoot().getAllChildren().size());
-
-    }
 
     public void insertTrajectory2(Trajectory traj) {
-        ++trajectoryCounter;
 
 
-        if (traj.getStartingTime()<=minStartingTime) {
+        int minRs=traj.getRoadSegments().stream().min(new IntegerComparator()).get();
+        int maxRs=traj.getRoadSegments().stream().max(new IntegerComparator()).get();
+        long maxTime=traj.getTimestamps().stream().max(new LongComparator()).get();
+
+
+        if (traj.getStartingTime() <= minStartingTime) {
             minStartingTime = traj.getStartingTime();
         }
 
-        if (traj.getStartingTime()>=maxStartingTime) {
-            maxStartingTime = traj.getStartingTime();
+        if (maxTime >= maxStartingTime) {
+            maxStartingTime = maxTime;
         }
 //
-        if (traj.getRoadSegments().size()<=minTrajLength) {
+        if (traj.getRoadSegments().size() <= minTrajLength) {
             minTrajLength = traj.getRoadSegments().size();
         }
 
-        if (traj.getRoadSegments().size()>=maxTrajLength) {
+        if (traj.getRoadSegments().size() >= maxTrajLength) {
             maxTrajLength = traj.getRoadSegments().size();
         }
 
-        if (traj.getStartingRS()<=minStartingRS) {
-            minStartingRS = traj.getStartingRS();
+        if ( minRs<= minStartingRS) {
+            minStartingRS = minRs;
         }
 
-        if (traj.getStartingRS()>=maxStartingRS) {
-            maxStartingRS = traj.getStartingRS();
+        if (maxRs >= maxStartingRS) {
+            maxStartingRS = maxRs;
         }
 
 
-        insertTrajectory2(traj.roadSegments, traj.trajectoryID, traj.getStartingTime(), traj.getEndingTime());
+        insertTrajectory2(traj.roadSegments, traj.trajectoryID, traj.timestamps);
     }
 
-
-    public boolean checkStartingRS(int startingRoadSegment) {
-
-        return root.checkIfRSExists(startingRoadSegment);
-//        return allStartingRSegments.contains(startingRoadSegment);
-    }
-
-    public void setHilbertValue(Long hilbertValue) {
-        this.hilbertValue = hilbertValue;
-    }
 }

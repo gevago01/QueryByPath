@@ -11,22 +11,23 @@ import java.util.List;
 /**
  * Created by giannis on 11/12/19.
  */
-public class CSVRecToAllSubTrajs implements Function<Iterable<CSVRecord>, Iterable<Iterable<CSVRecord>>> {
+public class CSVRecToAllSubTrajs2 implements Function<Iterable<CSVRecord>, Iterable<Iterable<CSVRecord>>> {
     @Override
     public Iterable<Iterable<CSVRecord>> call(Iterable<CSVRecord> csvRecords) throws Exception {
         ArrayList<CSVRecord> csvRecordList = Lists.newArrayList(csvRecords);
         csvRecordList.sort(Comparator.comparing(CSVRecord::getTimestamp));
 
         List<Iterable<CSVRecord>> allRecordCombinations = new ArrayList<>();
-        for (int i = 1; i < csvRecordList.size(); i++) {
+        for (int i = 2; i < csvRecordList.size() + 1; i++) {
+            List<CSVRecord> subL = csvRecordList.subList(0, i);
+            allRecordCombinations.add(subL);
 
-            List<List<CSVRecord>> allCombinationsOfSizeI = Lists.partition(csvRecordList, i);
+        }
 
-            for (List<CSVRecord> sizeIList : allCombinationsOfSizeI) {
+        for (int i = csvRecordList.size() - 2; i > 0; i--) {
+            List<CSVRecord> subL = csvRecordList.subList(i, csvRecordList.size());
+            allRecordCombinations.add(subL);
 
-                allRecordCombinations.add(sizeIList);
-
-            }
         }
 
         return allRecordCombinations;

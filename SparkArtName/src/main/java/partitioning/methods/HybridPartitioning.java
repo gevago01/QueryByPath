@@ -2,6 +2,7 @@ package partitioning.methods;
 
 import map.functions.AddTrajToTrie;
 import map.functions.CSVRecToTrajME;
+import map.functions.CSVRecordToTrajectory;
 import map.functions.LineToCSVRec;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
@@ -56,6 +57,8 @@ public class HybridPartitioning {
 
         String fileName = "hdfs:////"+dataHdfsName;
         String queryFile = "hdfs:////"+queryHdfsName;
+//        String fileName = "file:////mnt/hgfs/VM_SHARED/trajDatasets/tiny.csv";
+//        String queryFile = "file:////mnt/hgfs/VM_SHARED/trajDatasets/qq2.csv";
 //        String fileName = "file:///mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
 //        String queryFile = "file:///mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
 //        String fileName = "file:////mnt/hgfs/VM_SHARED/trajDatasets/lengthSkewedDataset/80pcLS.csv";
@@ -82,24 +85,25 @@ public class HybridPartitioning {
         catch (Exception e){
             skewnessFactor = 1;
         }
+
         HybridConfiguration.configure(records, skewnessFactor);
         if (args.length!=3) {
+
             bucketCapacity = HybridConfiguration.getBucketCapacityLowerBound();
         }
-
 //        int bucketCapacity = HybridConfiguration.getBucketCapacityLowerBound();
 //        int bucketCapacity = Integer.parseInt(args[2]);
         String appName = HorizontalPartitioning.class.getSimpleName() ;
         conf.setAppName(appName);
 
 
-        HybridPartitioner hp=new HybridPartitioner(records, HybridConfiguration.getRt_upperBound(),HybridConfiguration.getRl_upperBound(), HybridConfiguration.getRs_upperBound());
+        HybridPartitioner hp=new HybridPartitioner(records, HybridConfiguration.getRt_upperBound(), HybridConfiguration.getRs_upperBound());
 
 
         DoubleAccumulator joinTimeAcc = sc.sc().doubleAccumulator("joinTimeAcc");
 
 
-        JavaPairRDD<Integer, Trajectory> trajectoryDataset = records.groupBy(csv -> csv.getTrajID()).mapValues(new CSVRecToTrajME()).mapToPair((PairFunction<Tuple2<Integer, Trajectory>, Integer, Trajectory>) tr -> new Tuple2<>(hp.determineSlice(tr._2()), tr._2()));
+        JavaPairRDD<Integer, Trajectory> trajectoryDataset = records.groupBy(csv -> csv.getTrajID()).mapValues(new CSVRecordToTrajectory()).mapToPair((PairFunction<Tuple2<Integer, Trajectory>, Integer, Trajectory>) tr -> new Tuple2<>(hp.determineSlice(tr._2()), tr._2()));
 
 
         int nofTrajs = (int) trajectoryDataset.count();

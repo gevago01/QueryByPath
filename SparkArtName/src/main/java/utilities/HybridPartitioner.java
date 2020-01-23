@@ -13,7 +13,7 @@ import java.io.Serializable;
  */
 public class HybridPartitioner implements Serializable {
 
-    private final int lengthInterval;
+//    private final int lengthInterval;
     private final int roadSlices;
     private int temporalSlices;
     private int lengthSlices;
@@ -24,12 +24,12 @@ public class HybridPartitioner implements Serializable {
     private long minRS;
     private long maxRS;
     private long roadInterval;
-    private int maxTrajLength;
-    private int minTrajLength;
+//    private int maxTrajLength;
+//    private int minTrajLength;
 
-    public HybridPartitioner(JavaRDD<CSVRecord> records, int rt_upperBound, int rl_upperBound, int rs_upperBound) {
+    public HybridPartitioner(JavaRDD<CSVRecord> records, int rt_upperBound,  int rs_upperBound) {
         this.temporalSlices = rt_upperBound;
-        this.lengthSlices = rl_upperBound;
+//        this.lengthSlices = rl_upperBound;
         this.roadSlices = rs_upperBound;
 
         minTimestamp = records.map(r -> r.getTimestamp()).min(new LongComparator());
@@ -40,10 +40,10 @@ public class HybridPartitioner implements Serializable {
         maxRS = records.map(r -> r.getRoadSegment()).max(new IntegerComparator());
         roadInterval = (maxRS - minRS) / roadSlices;
 
-        maxTrajLength = records.groupBy(r -> r.getTrajID()).mapValues(it -> Iterables.size(it)).values().max(new IntegerComparator());
-        minTrajLength = records.groupBy(r -> r.getTrajID()).mapValues(it -> Iterables.size(it)).values().min(new IntegerComparator());
+//        maxTrajLength = records.groupBy(r -> r.getTrajID()).mapValues(it -> Iterables.size(it)).values().max(new IntegerComparator());
+//        minTrajLength = records.groupBy(r -> r.getTrajID()).mapValues(it -> Iterables.size(it)).values().min(new IntegerComparator());
 
-        lengthInterval = (int) Math.ceil((maxTrajLength - minTrajLength) / (double)lengthSlices);
+//        lengthInterval = (int) Math.ceil((maxTrajLength - minTrajLength) / (double)lengthSlices);
     }
 
 
@@ -54,12 +54,12 @@ public class HybridPartitioner implements Serializable {
 
     }
 
-    public int determineLengthSlice(int length) {
-
-        int lengthSlice = (int) Math.floor((length - minTrajLength) / lengthInterval);
-        return lengthSlice;
-
-    }
+//    public int determineLengthSlice(int length) {
+//
+//        int lengthSlice = (int) Math.floor((length - minTrajLength) / lengthInterval);
+//        return lengthSlice;
+//
+//    }
 
     /**
      * Returns unique slice / partition id
@@ -68,8 +68,6 @@ public class HybridPartitioner implements Serializable {
      * @return
      */
     public int determineSlice(final Trajectory trajectory) {
-
-        int lengthSlice = determineLengthSlice(trajectory.getRoadSegments().size());
 
         //if we have 10 slices, determineTimeSlice returns an integer [0,9]
         int timeSlice = determineTimeSlice(trajectory.getTimestamps());

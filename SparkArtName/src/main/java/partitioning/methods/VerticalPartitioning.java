@@ -1,9 +1,6 @@
 package partitioning.methods;
 
-import map.functions.AddTrajToTrie;
-import map.functions.CSVRecToTrajME;
-import map.functions.LineToCSVRec;
-import map.functions.VerticalQueryMap;
+import map.functions.*;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -44,10 +41,12 @@ public class VerticalPartitioning {
             queryHdfsName = args[1];
             bucketCapacity = Integer.parseInt(args[2]);
         }
-//        String fileName = "hdfs:////" + dataHdfsName;
-//        String queryFile = "hdfs:////" + queryHdfsName;
-        String queryFile = "file:////mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
-        String fileName = "file:////mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
+        String fileName = "hdfs:////" + dataHdfsName;
+        String queryFile = "hdfs:////" + queryHdfsName;
+//        String fileName = "file:////mnt/hgfs/VM_SHARED/trajDatasets/tiny.csv";
+//        String queryFile = "file:////mnt/hgfs/VM_SHARED/trajDatasets/qq2.csv";
+//        String queryFile = "file:////mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
+//        String fileName = "file:////mnt/hgfs/VM_SHARED/trajDatasets/onesix.csv";
 //        String fileName = "file:///mnt/hgfs/VM_SHARED/samplePort.csv";
 
 //        String queryFile = "file:///mnt/hgfs/VM_SHARED/trajDatasets/queryRecords.csv";
@@ -71,16 +70,17 @@ public class VerticalPartitioning {
             skewnessFactor = 1;
 
         }
-        HybridConfiguration.configure(records, skewnessFactor);
+
         if (args.length != 3) {
+            HybridConfiguration.configure(records, skewnessFactor);
             bucketCapacity = HybridConfiguration.getBucketCapacityLowerBound();
         }
 
-
+        System.out.println("bucketCapacityIsNow:" + bucketCapacity);
         JavaPairRDD<Integer, CSVRecord> queryRecords = sc.textFile(queryFile, Parallelism.PARALLELISM).map(new LineToCSVRec()).mapToPair(csvRec -> new Tuple2<>(csvRec.getTrajID(), csvRec));
 
 
-        JavaPairRDD<Integer, Trajectory> trajectoryDataset = records.groupBy(csv -> csv.getTrajID()).mapValues(new CSVRecToTrajME());
+        JavaPairRDD<Integer, Trajectory> trajectoryDataset = records.groupBy(csv -> csv.getTrajID()).mapValues(new CSVRecordToTrajectory());
 
         int nofTrajs = (int) trajectoryDataset.count();
         if (bucketCapacity > nofTrajs) {

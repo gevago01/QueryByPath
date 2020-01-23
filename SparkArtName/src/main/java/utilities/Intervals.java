@@ -12,16 +12,18 @@ import java.util.*;
 public class Intervals {
 
 
-
     public static HashMap<Integer, Integer> sliceHorizontalToBuckets2(JavaPairRDD<Integer, Trajectory> trajectoryDataset, final int bucketCapacity) {
 
-        List<Trajectory> groupedTrajs = trajectoryDataset.mapToPair(new PairFunction<Tuple2<Integer, Trajectory>, Integer, Trajectory>() {
+        //trajectory ids are sorted by length
+        List<Integer> groupedTrajs = trajectoryDataset.mapToPair(new PairFunction<Tuple2<Integer, Trajectory>, Integer, Integer>() {
             @Override
-            public Tuple2<Integer, Trajectory> call(Tuple2<Integer, Trajectory> t) throws Exception {
-                return new Tuple2<Integer, Trajectory>(t._2().getRoadSegments().size(), t._2());
+            public Tuple2<Integer, Integer> call(Tuple2<Integer, Trajectory> t) throws Exception {
+                return new Tuple2<Integer, Integer>(t._2().getRoadSegments().size(), t._2().getTrajectoryID());
             }
         })
                 .sortByKey().values().collect();
+
+
         HashMap<Integer, Integer> partitioning = assignTrajsToBuckets(groupedTrajs.iterator(), bucketCapacity);
 
 //        HashMap<Integer,Integer> partitioning = assignTrajsToBucketsHorizontal(trajectoryDataset.collect(),bucketCapacity);
@@ -35,11 +37,11 @@ public class Intervals {
     public static HashMap<Integer, Integer> sliceTSToBuckets2(JavaPairRDD<Integer, Trajectory> trajectoryDataset, final int bucketCapacity) {
 
 
-        List<Trajectory> groupedTrajs = trajectoryDataset.
-                mapToPair(new PairFunction<Tuple2<Integer, Trajectory>, Long, Trajectory>() {
+        List<Integer> groupedTrajs = trajectoryDataset.
+                mapToPair(new PairFunction<Tuple2<Integer, Trajectory>, Long, Integer>() {
                     @Override
-                    public Tuple2<Long, Trajectory> call(Tuple2<Integer, Trajectory> t) throws Exception {
-                        return new Tuple2<Long, Trajectory>(t._2().getStartingTime(), t._2());
+                    public Tuple2<Long, Integer> call(Tuple2<Integer, Trajectory> t) throws Exception {
+                        return new Tuple2<>(t._2().getStartingTime(), t._2().getTrajectoryID());
                     }
                 }).sortByKey().values().collect();
         HashMap<Integer, Integer> partitioning = assignTrajsToBuckets(groupedTrajs.iterator(), bucketCapacity);
@@ -49,11 +51,6 @@ public class Intervals {
 
 
     }
-
-
-
-
-
 
 
 //    private static HashMap<Integer,Integer> assignTrajsToBuckets2(JavaRDD<Iterable<Tuple2<Integer, Trajectory>>> groupedTrajs, int bucketCapacity, JavaSparkContext sc) {
@@ -105,10 +102,10 @@ public class Intervals {
 
     public static HashMap<Integer, Integer> sliceRSToBuckets2(JavaPairRDD<Integer, Trajectory> trajectoryDataset, final int bucketCapacity) {
 
-        List<Trajectory> groupedTrajs = trajectoryDataset.mapToPair(new PairFunction<Tuple2<Integer, Trajectory>, Integer, Trajectory>() {
+        List<Integer> groupedTrajs = trajectoryDataset.mapToPair(new PairFunction<Tuple2<Integer, Trajectory>, Integer, Integer>() {
             @Override
-            public Tuple2<Integer, Trajectory> call(Tuple2<Integer, Trajectory> tuple) throws Exception {
-                return new Tuple2<Integer, Trajectory>(tuple._2().getStartingRS(), tuple._2());
+            public Tuple2<Integer, Integer> call(Tuple2<Integer, Trajectory> tuple) throws Exception {
+                return new Tuple2<>(tuple._2(). getStartingRS(), tuple._2().getTrajectoryID());
             }
 
 
@@ -164,7 +161,16 @@ public class Intervals {
     public static HashMap<Integer, Integer> hybridSlicing(JavaPairRDD<Integer, Trajectory> trajectoryDataset, final int bucketCapacity) {
 
 
-        List<Trajectory> groupedTrajs = trajectoryDataset.sortByKey().values().collect();
+        List<Integer> groupedTrajs = trajectoryDataset.mapToPair(new PairFunction<Tuple2<Integer, Trajectory>, Integer, Integer>() {
+            @Override
+            public Tuple2<Integer, Integer> call(Tuple2<Integer, Trajectory> tuple) throws Exception {
+                return new Tuple2<>(tuple._1(), tuple._2().getTrajectoryID());
+            }
+
+
+        }).sortByKey().values().collect();
+
+
 
         HashMap<Integer, Integer> partitioning = assignTrajsToBuckets(groupedTrajs.iterator(), bucketCapacity);
 
@@ -172,7 +178,7 @@ public class Intervals {
     }
 
 
-    private static HashMap<Integer, Integer> assignTrajsToBuckets(Iterator<Trajectory> sortedTrajs, final int bucketCapacity) {
+    private static HashMap<Integer, Integer> assignTrajsToBuckets(Iterator<Integer> sortedTrajs, final int bucketCapacity) {
 
         HashMap<Integer, Integer> partitioning = new HashMap<>();
         int sum = 0;
@@ -181,8 +187,7 @@ public class Intervals {
         while (sortedTrajs.hasNext()) {
 
 
-
-            partitioning.put(sortedTrajs.next().getTrajectoryID(), bucketNumber);
+            partitioning.put(sortedTrajs.next(), bucketNumber);
             sum++;
             if (sum >= bucketCapacity) {
                 ++bucketNumber;
