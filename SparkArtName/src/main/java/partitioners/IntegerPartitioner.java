@@ -12,19 +12,13 @@ import utilities.Parallelism;
  */
 public class IntegerPartitioner extends Partitioner {
 
-    public IntegerPartitioner() {
-    }
-
     @Override
     public int numPartitions() {
-//        return numOfPartitions;
         return Parallelism.PARALLELISM;
     }
 
     @Override
     public int getPartition(Object trieObject) {
-        //this integer can be either a
-        //horizontalPartitionID or a timeSliceID
         Integer integer  = (Integer) trieObject;
         int hashValue = Integer.hashCode(integer);
         return Math.abs(hashValue) % numPartitions();

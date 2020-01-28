@@ -88,10 +88,6 @@ public class Trie implements Serializable {
 
         Set<Integer> answer = new TreeSet<>();
 
-        if (n.getRoadSegment()!=query.getPathSegments().get(level)){
-            System.err.println("wtf");
-            System.exit(1);
-        }
         Queue<Node> queue = new LinkedList<>();
         answer.addAll(n.getTrajectories(startingTime, endingTime+1));
         if (level>=query.getPathSegments().size()){

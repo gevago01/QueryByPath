@@ -53,52 +53,6 @@ public class Intervals {
     }
 
 
-//    private static HashMap<Integer,Integer> assignTrajsToBuckets2(JavaRDD<Iterable<Tuple2<Integer, Trajectory>>> groupedTrajs, int bucketCapacity, JavaSparkContext sc) {
-//        HashMap<Long,Long> partitioning = new HashMap<>();
-//        LongAccumulator sum = sc.sc().longAccumulator("NofQueries");
-//        LongAccumulator bucketNumber = sc.sc().longAccumulator("NofQueries");
-//
-//
-//        groupedTrajs.map(new Function<Iterable<Tuple2<Integer,Trajectory>>, HashMap<Long,Long>>() {
-//            @Override
-//            public HashMap<Long, Long> call(Iterable<Tuple2<Integer, Trajectory>> v1) throws Exception {
-//                List<Tuple2<Integer, Trajectory>> trajsAtThisTimestamp = Lists.newArrayList(tuple2s);
-//
-//
-//                for (Tuple2<Integer, Trajectory> trajectory: trajsAtThisTimestamp){
-//
-//                    partitioning.put(trajectory._2().getTrajectoryID(),bucketNumber.value());
-//                    sum.add(1l);
-//                    if (sum>=bucketCapacity){
-//                        ++bucketNumber;
-//                        sum=0;
-//                    }
-//                }
-//            }
-//        })
-//        groupedTrajs.foreach(new VoidFunction<Iterable<Tuple2<Integer, Trajectory>>>() {
-//            @Override
-//            public void call(Iterable<Tuple2<Integer, Trajectory>> tuple2s) throws Exception {
-//                List<Tuple2<Integer, Trajectory>> trajsAtThisTimestamp = Lists.newArrayList(tuple2s);
-//
-//
-//                for (Tuple2<Integer, Trajectory> trajectory: trajsAtThisTimestamp){
-//
-//                    partitioning.put(trajectory._2().getTrajectoryID(),bucketNumber.value());
-//                    sum.add(1l);
-//                    if (sum>=bucketCapacity){
-//                        ++bucketNumber;
-//                        sum=0;
-//                    }
-//                }
-//
-//
-//            }
-//        });
-//
-//        return partitioning;
-//
-//    }
 
     public static HashMap<Integer, Integer> sliceRSToBuckets2(JavaPairRDD<Integer, Trajectory> trajectoryDataset, final int bucketCapacity) {
 

@@ -57,7 +57,6 @@ public class Node implements Serializable {
 
     public Collection<Integer> getTrajectories(long startingTime, long endingTime) {
         SortedMap<Long, IntArraySet> startingEntries = trajectoryStartTime.subMap(startingTime, endingTime);
-//        SortedMap<Long, IntArraySet> endingEntries = trajectoryEndTime.subMap(startingTime, endingTime);
 
 
         final TreeSet<Integer> startingAnswer = new TreeSet<>();
@@ -65,13 +64,6 @@ public class Node implements Serializable {
             startingAnswer.addAll(entry.getValue());
         }
 
-//        final TreeSet<Integer> endingAnswer = new TreeSet<>();
-//        for (Map.Entry<Long, IntArraySet> entry : endingEntries.entrySet()) {
-//            endingAnswer.addAll(entry.getValue());
-//        }
-//
-//        startingAnswer.retainAll(endingAnswer);
-        //startingAnswer contains elements in both sets
         return startingAnswer;
     }
 
@@ -86,52 +78,6 @@ public class Node implements Serializable {
         }
     }
 
-
-//    private TreeMap<Long, IntArraySet> timeToTID = new TreeMap<>();
-//        public Collection<Integer> getTrajectories(long startingTime, long endingTime) {
-//        SortedMap<Long, IntArraySet> entries = timeToTID.subMap(startingTime, endingTime);
-//        final TreeSet<Integer> answer=new TreeSet<>();
-//        for (Map.Entry<Long, IntArraySet> entry:entries.entrySet()) {
-//            answer.addAll(entry.getValue());
-//        }
-//        return answer;
-//}
-//
-//    public void addTrajectory(long timestamp, int trajectoryID) {
-//        if (timeToTID.containsKey(timestamp)){
-//            timeToTID.get(timestamp).add(trajectoryID);
-//        }
-//        else{
-//            IntArraySet trajSet=new IntArraySet();
-//            trajSet.add(trajectoryID);
-//            timeToTID.put(timestamp,trajSet);
-//        }
-//    }
-
-//    private ArrayList<TimeTrajIDTuple> timeToTID = new ArrayList<>();
-//    public void addTrajectory(long timestamp, int trajectoryID) {
-//
-//        Optional<TimeTrajIDTuple> found = timeToTID.stream().filter(tuple -> tuple.getTimestamp() == timestamp).findFirst();
-//        TimeTrajIDTuple timeTrajIDTuple = null;
-//        try {
-//            timeTrajIDTuple = found.get();
-//        } catch (NoSuchElementException nsee) {
-//            timeTrajIDTuple = new TimeTrajIDTuple();
-//            timeTrajIDTuple.setTimestamp(timestamp);
-//            timeToTID.add(timeTrajIDTuple);
-//        }
-//        timeTrajIDTuple.addTrajID(trajectoryID);
-//
-//
-//    }
-//
-//    public Collection<Integer> getTrajectories(long startingTime, long endingTime) {
-//        return timeToTID.stream().filter(t -> t.getTimestamp() >= startingTime && t.getTimestamp() <= endingTime).flatMap(t -> t.getTrajIDs().stream()).collect(toList());
-//    }
-
-    public Integer getLevel() {
-        return level;
-    }
 
     public List<Node> getAllChildren() {
         return children.values().stream().flatMap(l -> l.stream()).collect(Collectors.toList());

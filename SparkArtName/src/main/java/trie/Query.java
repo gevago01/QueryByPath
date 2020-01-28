@@ -1,14 +1,11 @@
 package trie;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import partitioners.StartingRSPartitioner;
-import utilities.PartitioningMethods;
 import utilities.Trajectory;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class Query implements Serializable {
 
@@ -19,35 +16,35 @@ public class Query implements Serializable {
     public IntArrayList pathSegments = new IntArrayList();
 
 
-
     /**
      * called for time slicing
+     *
      * @param t
      * @param timestamps
      */
     public Query(Trajectory t, List<Long> timestamps) {
 
-        this(t.getStartingTime(),t.getEndingTime(),t.roadSegments);
-            List<Integer> timeSlices=determineTimeSliceLongs(timestamps);
-//            partitionID=timeSlices.get(new Random().nextInt(timeSlices.size())) % Parallelism.PARALLELISM;
-            partitionID =timeSlices.stream().findAny().get() ;
+        this(t.getStartingTime(), t.getEndingTime(), t.roadSegments);
+        List<Integer> timeSlices = determineTimeSliceLongs(timestamps);
+        partitionID = timeSlices.stream().findAny().get();
     }
 
     public Query(long startingTime, long endingTime, List<Integer> roadSegments) {
-        this.startingTime=startingTime;
-        this.endingTime=endingTime;
-        this.pathSegments=new IntArrayList(roadSegments);
+        this.startingTime = startingTime;
+        this.endingTime = endingTime;
+        this.pathSegments = new IntArrayList(roadSegments);
 
     }
 
     public Query(Trajectory t) {
 
-        this(t.getStartingTime(),t.getEndingTime(),t.roadSegments);
+        this(t.getStartingTime(), t.getEndingTime(), t.roadSegments);
     }
 
     public int getQueryID() {
         return queryID;
     }
+
     public void setQueryID(int queryID) {
         this.queryID = queryID;
     }
@@ -57,7 +54,7 @@ public class Query implements Serializable {
     }
 
     public void setPartitionID(int partition) {
-        partitionID=partition;
+        partitionID = partition;
     }
 
 
@@ -102,8 +99,6 @@ public class Query implements Serializable {
     }
 
 
-
-
     public List<Integer> determineTimeSliceLongs(List<Long> timePeriods) {
         List<Integer> timeSlices = new ArrayList<>();
         boolean foundMax = false;
@@ -122,7 +117,7 @@ public class Query implements Serializable {
 
         }
 
-        if (minIndex==maxIndex){
+        if (minIndex == maxIndex) {
             timeSlices.add(minIndex);
         }
 

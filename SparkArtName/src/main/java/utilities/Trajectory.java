@@ -13,7 +13,6 @@ public class Trajectory implements Serializable, Comparable<Trajectory> {
     public int trajectoryID;
     private int partitionID;
     public IntArrayList roadSegments = new IntArrayList();
-//    ShortArrayLi
     public LongArrayList timestamps = new LongArrayList();
 
     public LongArrayList getTimestamps() {
@@ -47,7 +46,6 @@ public class Trajectory implements Serializable, Comparable<Trajectory> {
 
 
     public void addRoadSegment(int roadSegment) {
-//        roadSegments.add(roadSegment.intern());
         roadSegments.add(roadSegment);
     }
 
@@ -72,7 +70,6 @@ public class Trajectory implements Serializable, Comparable<Trajectory> {
     public void addSample(Long timestamp, int roadID) {
 
         timestamps.add(timestamp);
-//        roadSegments.add(roadID.intern());
         roadSegments.add(roadID);
 
     }
@@ -86,7 +83,6 @@ public class Trajectory implements Serializable, Comparable<Trajectory> {
             sb.append(trajectoryID).append(", ").append(", ").append(roadSegments.getInt(i) + "\n");
         }
 
-//        sb.deleteCharAt(sb.length() );
         return sb.toString();
     }
 

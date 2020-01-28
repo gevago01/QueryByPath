@@ -52,11 +52,11 @@ public class VerticalPartitioning {
 //        String queryFile = "file:///mnt/hgfs/VM_SHARED/trajDatasets/queryRecords.csv";
 //        String queryFile = "file:////data/queryRecords.csv";
 
-        SparkConf conf = new SparkConf()
-                .setMaster("local[*]")
-                .set("spark.executor.instances", "" + Parallelism.PARALLELISM)
-                .setAppName(VerticalPartitioning.class.getSimpleName());
-//        SparkConf conf = new SparkConf().setAppName(VerticalPartitioning.class.getSimpleName() + bucketCapacity);
+//        SparkConf conf = new SparkConf()
+//                .setMaster("local[*]")
+//                .set("spark.executor.instances", "" + Parallelism.PARALLELISM)
+//                .setAppName(VerticalPartitioning.class.getSimpleName());
+        SparkConf conf = new SparkConf().setAppName(VerticalPartitioning.class.getSimpleName() + bucketCapacity);
 
         JavaSparkContext sc = new JavaSparkContext(conf);
         JavaRDD<CSVRecord> records = sc.textFile(fileName).map(new LineToCSVRec());

@@ -91,8 +91,7 @@ public class HybridPartitioning {
 
             bucketCapacity = HybridConfiguration.getBucketCapacityLowerBound();
         }
-//        int bucketCapacity = HybridConfiguration.getBucketCapacityLowerBound();
-//        int bucketCapacity = Integer.parseInt(args[2]);
+
         String appName = HorizontalPartitioning.class.getSimpleName() ;
         conf.setAppName(appName);
 

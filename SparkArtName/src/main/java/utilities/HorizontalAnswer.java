@@ -24,10 +24,6 @@ public class HorizontalAnswer implements Serializable{
         return answer;
     }
 
-    public int getQueryID() {
-        return queryID;
-    }
-
 
 
     public HorizontalAnswer(int queryID){
